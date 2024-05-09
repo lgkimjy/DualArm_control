@@ -1,0 +1,3 @@
+[submodule "include/ARBMLlib"]
+	path = include/ARBMLlib
+	url = https://github.com/HumanoidRoboticsLab/ARBMLlib.git
