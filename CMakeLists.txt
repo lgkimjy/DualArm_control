@@ -22,12 +22,18 @@ endif()
 #################################
 # Open Libraries ADD here
 #################################
-option(MUJOCO_BUILD_EXAMPLES "Build samples for MuJoCo" OFF)
+option(MUJOCO_BUILD_EXAMPLES "Build samples for MuJoCo" ON)
 option(MUJOCO_BUILD_SIMULATE "Build simulate library for MuJoCo" ON)
 option(MUJOCO_BUILD_TESTS "Build tests for MuJoCo" OFF)
 option(MUJOCO_TEST_PYTHON_UTIL "Build and test utility libraries for Python bindings" ON)
 add_subdirectory(${PROJECT_SOURCE_DIR}/libraries/mujoco)                             # Add subdirectory
+add_subdirectory(${PROJECT_SOURCE_DIR}/libraries/yaml-cpp)
+# option(BUILD_SHARED_LIBS "If ON, build shared library instead of static" OFF)
+# option(QPOASES_BUILD_EXAMPLES "Build examples." OFF)
+# option(QPOASES_AVOID_LA_NAMING_CONFLICTS "If ON, avoid to re-defined symbols that conflict with Blas/Lapack provided functions." OFF)
+# add_subdirectory(${PROJECT_SOURCE_DIR}/libraries/qpoases)
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/libraries/mujoco/sample/cmake") # CMake Path append
+add_definitions(-DCMAKE_SOURCE_DIR="${CMAKE_SOURCE_DIR}")
 #################################
 # Open Libraries ENDS here
 #################################
@@ -73,6 +79,15 @@ endif()
 #################################
 find_package(Eigen3 REQUIRED)
 
+include(FetchContent)
+FetchContent_Declare(csvpp
+GIT_REPOSITORY https://github.com/andreacasalino/csvcpp
+GIT_TAG        main
+)
+set(BUILD_CSV_READER_SAMPLES OFF)
+set(BUILD_CSV_READER_TESTS OFF)
+FetchContent_MakeAvailable(csvpp)
+
 include_directories(
     include
     INCLUDE_DIRS include
@@ -101,6 +116,8 @@ target_link_libraries(template
   glfw
   Threads::Threads
   lodepng
+  csvpp
+  yaml-cpp
 )
 target_compile_options(template PUBLIC ${MUJOCO_SIMULATE_COMPILE_OPTIONS})
 #################################

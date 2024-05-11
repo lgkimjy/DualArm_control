@@ -475,26 +475,15 @@ int main(int argc, char** argv) {
     //   filename = argv[1];
   // }
 
-
 ///////////////////////////// USER CODE : START /////////////////////////////
-#if defined(ROBOT1)
-	const char* filename = "../model/DualArm/DualArm3DoF_FloatingBase.xml";
-#elif defined(ROBOT2)
-	const char* filename = "../model/DualArm/DualArm_Torso.xml";
-#elif defined(ROBOT3)
-	const char* filename = "../model/DualArm/DualArm.xml";
-#elif defined(ROBOT4)
-	const char* filename = "../model/KIST Arm-Hand/Arm-Hand.xml";
-#elif defined(ROBOT5)
-	const char* filename = "../model/KIST DualArm-Hand/KIST DualArm-Hand.xml";
-#elif defined(ROBOT6)
-	const char* filename = "../model/KIST MAHRU-WL/KIST MAHRU-WL_w_Battery.xml";
-#elif defined(ROBOT7)
-	const char* filename = "../model/KIST Hand/KIST-Hand.xml";
-#elif defined(ROBOT8)
-	const char* filename = "../model/Unitree-A1/A1.xml";
-#elif defined(ROBOT9)
-	const char* filename = "../model/Baxter/Baxter.xml";
+#if defined(YORI)
+	const char* filename = "../model/YORI/DualArm3DoF_FloatingBase.xml";
+#elif defined(ArmHand)
+	const char* filename = "../model/KIST_Arm-Hand/Arm-Hand.xml";
+#elif defined(DualArm)
+	const char* filename = "../model/KIST_DualArm/KIST DualArm.xml";
+#elif defined(DualArmHand)
+	const char* filename = "../model/KIST_DualArm-Hand/KIST DualArm-Hand.xml";
 #endif
 ////////////////////////////// USER CODE : END //////////////////////////////
 

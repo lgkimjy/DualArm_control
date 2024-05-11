@@ -11,7 +11,6 @@ CRobotControl::CRobotControl() : count_sim(0), count_ctrl(0), CtrlFlag(0), TaskF
 
 	joint_torq.setZero();
 
-
 	no_of_EE = 0;
 	id_body_EE.clear();
 
@@ -27,6 +26,11 @@ CRobotControl::CRobotControl() : count_sim(0), count_ctrl(0), CtrlFlag(0), TaskF
 	Jr_EE.clear();
 	Jdotp_EE.clear();
 	Jdotr_EE.clear();
+
+	sim_time = 0.0;
+	K_qp.setZero();
+	K_qv.setZero();
+	qpos_ref.setZero();
 }
 
 
@@ -61,7 +65,6 @@ void CRobotControl::initEEParameters(const mjModel* model)
 	int i;
 	Eigen::Vector3d temp_vec;
 	Eigen::Vector4d temp_quat;
-
 
 	//////////	Get body ID for end-effectors (defined in XML file via model->site !)
 	no_of_EE = model->nsite;
@@ -142,17 +145,31 @@ void CRobotControl::outputEEInformation()
 
 void CRobotControl::initCtrlParameters(const mjModel* model_mj)
 {
-	K_qp = 1000.0 * K_qp.setIdentity();
-	K_qv = 100.0 * K_qv.setIdentity();
+	YAML::Node yaml_node;
+#if defined(YORI)
+	std::string path = CMAKE_SOURCE_DIR"/config/YORI.yaml";
+#elif defined(ArmHand)
+	std::string path = CMAKE_SOURCE_DIR"/config/ArmHand.yaml";
+#elif defined(DualArm)
+	std::string path = CMAKE_SOURCE_DIR"/config/DualArm.yaml";
+#elif defined(DualArmHand)
+	std::string path = CMAKE_SOURCE_DIR"/config/DualArmHand.yaml";
+#endif
+	yaml_node = YAML::LoadFile(path.c_str());
 
-	//	Task selection
-	TaskFlag = TaskScheduleFlag = task_standing;
-
-	//CtrlFlag = (unsigned)PointJointPD;
-	CtrlFlag = (unsigned)TrackingJointPD;
-
-	//cout << "Task Flag : " << TaskFlag << endl;
-	//cout << "Control Flag : " << CtrlFlag << endl;
+	try
+	{
+		for(int i=0; i<ACTIVE_DOF; i++)
+		{
+			K_qp(i, i) = yaml_node["PD_gain"]["kp"][i].as<double>();
+			K_qv(i, i) = yaml_node["PD_gain"]["kd"][i].as<double>();
+			qpos_ref(i) = D2R(yaml_node["initial_pos"][i].as<double>());
+		}
+	}
+	catch (const std::exception& e)
+	{
+		std::cerr << "Config File Parse ERROR" << std::endl;
+	}
 }
 
 
@@ -216,6 +233,7 @@ void CRobotControl::UserControl(mjModel* model, mjData* data)
 ///////////////////////////////////////////////////////////////////////////
 void CRobotControl::getFeedbackInformation(const mjData* data)
 {
+	sim_time = data->time;
 #ifdef _FLOATING_BASE
 	/////	Position vector of floating-base body w.r.t {I}
 	robot.p_B(0) = data->qpos[0];
@@ -269,9 +287,47 @@ void CRobotControl::getFeedbackInformation(const mjData* data)
 
 void CRobotControl::computeControlInput()
 {
-	// joint_torq = K_qp * (0.0 - robot.q) + K_qv * (0.0 - robot.qdot);
+	qpos_d.setZero();
+	qvel_d.setZero();
+	qacc_d.setZero();
+
+	if(sim_time <= TORQUE_ON){
+		computeJointTorque(JOINT_PD);
+	}
+	else if(sim_time <= TORQUE_ON + INITIAL_POSE) {
+		JointPlanner(INITIAL_POSE);
+		computeJointTorque(JOINT_PD);
+	}
+	else
+	{
+		JointPlanner(INITIAL_POSE);
+		// JointPlanner();
+#if defined(YORI)
+	computeJointTorque(JOINT_PD);
+#elif defined(ArmHand)
+	computeJointTorque(JOINT_PD);
+#elif defined(DualArm)
+	computeJointTorque(JOINT_PD);
+#elif defined(DualArmHand)
+	computeJointTorque(JOINT_PD);
+#endif
+	}
 }
 
+void CRobotControl::JointPlanner(double duration)
+{
+	if(Joint_Traj.is_moving_ == false)
+	{
+		Joint_Traj.setTargetPosition(robot.q, qpos_ref, duration, 1 / 1000.0, QUINTIC);
+	}
+	Joint_Traj.computeTraj(qpos_d, qvel_d, qacc_d);
+}
+
+void CRobotControl::computeJointTorque(CtrlType type)
+{
+	if(type == JOINT_PD)
+		joint_torq = qacc_d + K_qp * (qpos_d - robot.q) + K_qv * (qvel_d - robot.qdot);
+}
 
 
 ////////////////////////////////////////////////////////////////////////////////

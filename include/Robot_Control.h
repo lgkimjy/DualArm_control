@@ -1,50 +1,34 @@
-//
-//
 #pragma once
 
 #include <chrono>
 #include <fstream>
+
+#include <yaml-cpp/yaml.h>
+
 #include "ARBMLlib/ARBML.h"
-//#include "PathPoint/jointPathPoint.h"
-//#include "PathPoint/taskPosPathPoint.h"
-//#include "PathPoint/taskOriPathPoint.h"
+#include "Trajectory/JointTrajectory.h"
 
 using namespace std;
 
 //	Time Variables
-constexpr sysReal TIME_START = 3.0;				//	Second
-constexpr sysReal TIME_TASK_EXECUTION = 2.0;	//	Second
-
+constexpr sysReal TORQUE_ON = 1.0;				//	Second
+constexpr sysReal INITIAL_POSE = 2.0;				//	Second
 
 //	Multiple of Simulation Step(Forward dynamics) > 1
 constexpr int CONTROL_RATE = 1;
 
-
-//	Control Related ...
-enum control_list
-{
-	noControl = 0,
-	PointJointPD,
-	TrackingJointPD
-};
-
-
-
-//	Task List
-enum task_list
-{
-	noControlSubtask = 0,
-	task_standing
-};
-
-
+typedef enum {
+	JOINT_PD = 0X01,
+	TORQUE	 = 0X02,
+}CtrlType;
 
 class CRobotControl
 {
 private:
-	CARBML robot;
 
 public:
+	
+	CARBML robot;
 	CRobotControl();
 	~CRobotControl() {}
 
@@ -57,8 +41,6 @@ public:
 	//////////	Active joint variables	//////////
 	Eigen::Matrix<double, ACTIVE_DOF, 1>			joint_torq;					//	Active joint torque
 	Eigen::Matrix<double, ACTIVE_DOF, 1>			qpos_d, qvel_d, qacc_d;		//	Desired position & velocity of active joint
-
-	Eigen::Matrix<double, ACTIVE_DOF, ACTIVE_DOF> 	K_qp, K_qv;					//	Joint gain matrices for active joint
 
 
 	///////////////////////////////////////////////////////////////////////////
@@ -92,6 +74,22 @@ public:
 	vector<Eigen::Matrix<double, DOF3, TOTAL_DOF>>		Jr_EE;				//	i-th End-effector angular Jacobian
 	vector<Eigen::Matrix<double, DOF3, TOTAL_DOF>>		Jdotp_EE;			//	Time derivative of Jp_EE
 	vector<Eigen::Matrix<double, DOF3, TOTAL_DOF>>		Jdotr_EE;			//	Time derivative of Jr_EE
+
+
+	////////////////	JY CODE	////////////////
+	double sim_time;
+	Eigen::Matrix<double, ACTIVE_DOF, ACTIVE_DOF> 	K_qp, K_qv;		//	Joint gain matrices for active joint
+	
+	// Polynomial Trajectory
+	CP2P_Traj<ACTIVE_DOF, double> 			Joint_Traj;
+	CP2P_Traj<DOF3, double> 				LPos_Traj;
+	CP2P_Traj<DOF3, double> 				RPos_Traj;
+	Eigen::Matrix<double, ACTIVE_DOF, 1> 	qpos_ref;
+
+	void computeMotionTasks();
+	void JointPlanner(double duration);
+	void computeJointTorque(CtrlType type);
+	////////////////	JY CODE	////////////////
 
 
 	//////////	Functions	//////////
