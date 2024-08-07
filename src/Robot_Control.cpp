@@ -292,23 +292,20 @@ void CRobotControl::computeControlInput()
 	}
 	else if(sim_time <= TORQUE_ON + INITIAL_POSE) {
 		JointPlanner(INITIAL_POSE);
-		computeJointTorque(JOINT_PD);
+		computeJointTorque(TORQUE);
 	}
 	else
 	{
-		joint_torq = robot.M_mat * (K_qp * (qpos_d - robot.q) + K_qv * (qvel_d - robot.qdot)) + robot.C_mat * robot.qdot + robot.g_vec;
-// 		// if(sim_time <= )
-// 		JointPlanner(INITIAL_POSE);
-// 		// JointPlanner();
-// #if defined(YORI)
-// 	computeJointTorque(JOINT_PD);
-// #elif defined(ArmHand)
-// 	computeJointTorque(JOINT_PD);
-// #elif defined(DualArm)
-// 	computeJointTorque(JOINT_PD);
-// #elif defined(DualArmHand)
-// 	computeJointTorque(JOINT_PD);
-// #endif
+		NullSpacePlanner();
+#if defined(YORI)
+		computeJointTorque(TORQUE);
+#elif defined(ArmHand)
+		computeJointTorque(TORQUE);
+#elif defined(DualArm)
+		computeJointTorque(TORQUE);
+#elif defined(DualArmHand)
+		computeJointTorque(TORQUE);
+#endif
 	}
 }
 
@@ -322,11 +319,39 @@ void CRobotControl::JointPlanner(double duration)
 	Joint_Traj.computeTraj(qpos_d, qvel_d, qacc_d);
 }
 
+void CRobotControl::LeftEEPlanner(double duration, Eigen::Vector3d EE_pos)
+{
+	if(LPos_Traj.is_moving_ == false)
+	{
+		std::cout << "[" << sim_time << "] At LeftEEPlanner" << std::endl;
+		LPos_Traj.setTargetPosition(p_EE[0], EE_pos, duration, 1 / 1000.0, CUBIC);
+	}
+	// LPos_Traj.computeTraj(qpos_d, qvel_d, qacc_d);
+}
+
+void CRobotControl::RightEEPlanner(double duration, Eigen::Vector3d EE_pos)
+{
+	if(RPos_Traj.is_moving_ == false)
+	{
+		std::cout << "[" << sim_time << "] At RightEEPlanner" << std::endl;
+		RPos_Traj.setTargetPosition(p_EE[1], EE_pos, duration, 1 / 1000.0, CUBIC);
+	}
+	// RPos_Traj.computeTraj(qpos_d, qvel_d, qacc_d);
+}
+
+void CRobotControl::NullSpacePlanner()
+{
+
+}
+
 void CRobotControl::computeJointTorque(CtrlType type)
 {
 	if(type == JOINT_PD) {
 		// joint_torq = qacc_d + K_qp * (qpos_d - robot.q) + K_qv * (qvel_d - robot.qdot);
 		joint_torq = K_qp * (qpos_d - robot.q) + K_qv * (qvel_d - robot.qdot);
+	} else if(type == TORQUE) {
+		// joint_torq = qacc_d + K_qp * (qpos_d - robot.q) + K_qv * (qvel_d - robot.qdot);
+		joint_torq = robot.M_mat * (500 * (qpos_d - robot.q) + 20 * (qvel_d - robot.qdot)) + robot.C_mat * robot.qdot + robot.g_vec;
 	}
 }
 

@@ -75,8 +75,9 @@ public:
 	vector<Eigen::Matrix<double, DOF3, TOTAL_DOF>>		Jdotp_EE;			//	Time derivative of Jp_EE
 	vector<Eigen::Matrix<double, DOF3, TOTAL_DOF>>		Jdotr_EE;			//	Time derivative of Jr_EE
 
-
+	////////////////////////////////////////////
 	////////////////	JY CODE	////////////////
+	////////////////////////////////////////////
 	double sim_time;
 	Eigen::Matrix<double, ACTIVE_DOF, ACTIVE_DOF> 	K_qp, K_qv;		//	Joint gain matrices for active joint
 	
@@ -88,8 +89,13 @@ public:
 
 	void computeMotionTasks();
 	void JointPlanner(double duration);
+	void LeftEEPlanner(double duration, Eigen::Vector3d EE_pos);
+	void RightEEPlanner(double duration, Eigen::Vector3d EE_pos);
+	void NullSpacePlanner();
 	void computeJointTorque(CtrlType type);
+	////////////////////////////////////////////
 	////////////////	JY CODE	////////////////
+	////////////////////////////////////////////
 
 
 	//////////	Functions	//////////
