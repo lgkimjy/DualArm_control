@@ -1,0 +1,89 @@
+<mujoco model="KIST MAHRU-WL with Battery">
+	<compiler angle="radian" autolimits="false" meshdir="Meshes" texturedir="Meshes" inertiafromgeom="true"/>
+	
+	<option timestep="0.001" gravity="0 0 -9.81" tolerance="1e-08" cone="elliptic" jacobian="dense" solver="Newton"  noslip_iterations="10" integrator="Euler" iterations="30" impratio="10.0"/> 
+	<option>
+		<flag override="enable" gravity="enable"/>
+	</option>
+
+	<visual>
+		<global fovy="45" linewidth="2" glow="0.3"/>
+		<quality shadowsize="4096" numslices="48"/>
+		<map stiffness="50" stiffnessrot="100"/>
+		<rgba haze="0.6 0.8 0.9 1" force="1 0 0 0.5" com="0 0 1 1"/>
+	</visual>
+
+	<default>
+		<joint limited="false" damping="0.1" armature="0.1" stiffness="0" frictionloss="0.0"/>
+		<motor gear="1 0 0 0 0 0" ctrllimited="false" ctrlrange="-100 100"/>
+	</default>
+
+	<asset>
+		<mesh name="base_link" file="base_link_bottom_origin.stl"/>
+		<mesh name="clavicle" file="clavicle.stl"/>
+		<mesh name="shoulder_left" file="shoulder_left.stl"/>
+		<mesh name="upperarm_left" file="upperarm_left.stl"/>
+		<mesh name="forearm_left" file="forearm_left.stl"/>
+		<mesh name="wrist_left" file="wrist_left.stl"/>
+		<mesh name="toolchanger_left" file="toolchanger_left.stl"/>
+		<mesh name="shoulder_right" file="shoulder_right.stl"/>
+		
+		<texture type="skybox" builtin="gradient" rgb1="0.3 0.5 0.7" rgb2="0 0 0" width="512" height="3072"/>
+		<texture type="2d" name="groundplane" builtin="checker" mark="edge" rgb1="0.2 0.3 0.4" rgb2="0.1 0.2 0.3"
+		  markrgb="0.8 0.8 0.8" width="300" height="300"/>
+		<material name="groundplane" texture="groundplane" texuniform="true" texrepeat="5 5" reflectance="0.2"/>
+	</asset>
+	
+	<worldbody>
+		<light pos="0 0 3.5" dir="0 0 -1" directional="true"/>
+		<geom name="floor" size="0 0 0.05" type="plane" material="groundplane"/>
+
+		<!-- BASE : Pelvis -->
+		<body name="base" pos="0 0 0">
+			<!-- <inertial pos="-0.00067614 -5.55e-05 0.0714295" quat="0.706127 -0.0205059 -0.0182855 0.707552" mass="2.28058" diaginertia="0.00672353 0.00634586 0.00411024"/> -->
+			<geom name="base" type="mesh" mesh="base_link" contype="0" conaffinity="0"/>
+				<body name="clavicle_link" pos="0 0 1.1276">
+					<joint name="clavicle_yaw" pos="0 0 0" axis="0 0 1" limited="false" range="-3.14 3.14"/>
+					<geom name="clavicle" type="mesh" mesh="clavicle"/>
+					
+					<body name="shoulder_left" pos="0 0.21 0.117">
+						<joint name="lshoulder_yaw" pos="0 0 0" axis="0 0 1" limited="false" range="-3.14 3.14"/>
+						<geom name="shoulder_left" type="mesh" mesh="shoulder_left"/>
+						<body name="upperarm_left" pos="0 0.15 0" euler="-1.5708 0 0">
+							<joint name="lupperarm_pitch" pos="0 0 0" axis="0 0 1" limited="false" range="-3.14 3.14"/>
+							<geom name="upperarm_left" type="mesh" mesh="upperarm_left"/>
+							<body name="forearm_left" pos="0 0.4 0">
+								<joint name="lforearm_pitch" pos="0 0 0" axis="0 0 1" limited="false" range="-3.14 3.14"/>
+								<geom name="forearm_left" type="mesh" mesh="forearm_left"/>
+								<body name="wrist_left" pos="0.375 0 0">
+									<joint name="lwrist_yaw" pos="0 0 0" axis="0 0 1" limited="false" range="-3.14 3.14"/>
+									<geom name="wrist_left" type="mesh" mesh="wrist_left"/>
+									<body name="toolchanger_left" pos="0.01925 0 0" euler="0 1.5708 1.5708">
+										<joint name="ltoolchanger_pitch" pos="0 0 0" axis="0 0 1" limited="false" range="-3.14 3.14"/>
+										<geom name="toolchanger_left" type="mesh" mesh="toolchanger_left"/>
+									</body>
+								</body>
+							</body>
+						</body>
+					</body>
+
+					<body name="shoulder_right" pos="0 -0.21 0.117">
+						<joint name="rshoulder_yaw" pos="0 0 0" axis="0 0 1" limited="false" range="-3.14 3.14"/>
+						<geom name="shoulder_right" type="mesh" mesh="shoulder_right"/>
+					</body>
+				</body>
+		</body>
+	</worldbody>
+
+	<actuator>
+		<motor name="clavicle-yaw" gear="1" joint="clavicle_yaw"/>
+		<motor name="lshoulder-yaw" gear="1" joint="lshoulder_yaw"/>
+		<motor name="lupperarm-pitch" gear="1" joint="lupperarm_pitch"/>
+		<motor name="lforearm-pitch" gear="1" joint="lforearm_pitch"/>
+		<motor name="lwrist_yaw" gear="1" joint="lwrist_yaw"/>
+		<motor name="ltoolchanger-pitch" gear="1" joint="ltoolchanger_pitch"/>
+
+		<motor name="rshoulder-yaw" gear="1" joint="rshoulder_yaw"/>
+	</actuator>
+	
+</mujoco>

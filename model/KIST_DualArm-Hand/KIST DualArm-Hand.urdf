@@ -1,0 +1,2176 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This URDF was automatically created by SolidWorks to URDF Exporter! Originally created by Stephen Brawner (brawner@gmail.com) 
+     Commit Version: 1.6.0-1-g15f4949  Build Version: 1.6.7594.29634
+     For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
+
+<robot name="dualarm">
+
+<mujoco>
+        <compiler meshdir="meshes"                  balanceinertia="true"                  strippath="false"/>
+        <option collision="predefined" cone="elliptic" jacobian="sparse" tolerance="1e-6" iterations="30" solver="CG" timestep="0.002"/>
+</mujoco>
+
+  <link
+    name="base_link">
+    <inertial>
+      <origin
+        xyz="-4.0953E-06 -0.042766 0.22804"
+        rpy="0 0 -1.5707963267949" />
+      <mass
+        value="44.006" />
+      <inertia
+        ixx="3.0534"
+        ixy="-5.4432E-07"
+        ixz="4.6629E-06"
+        iyy="3.5629"
+        iyz="-0.0079515"
+        izz="3.3409" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 -1.5707963267949" />
+      <geometry>
+        <mesh
+          filename="base_link.STL" />
+      </geometry>
+	<origin
+        xyz="0 0 0"
+        rpy="0 0 1" />
+      <material
+        name="">
+        <color
+          rgba="0.50196 1 0.50196 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 -1.5707963267949" />
+      <geometry>
+        <mesh
+          filename="base_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <link
+    name="body_link">
+    <inertial>
+      <origin
+        xyz="0.070879 0.38092 3.2435E-05"
+        rpy="0 0 0" />
+      <mass
+        value="5.9559" />
+      <inertia
+        ixx="0.017572"
+        ixy="3.3631E-05"
+        ixz="1.2495E-05"
+        iyy="0.012836"
+        iyz="8.0101E-06"
+        izz="0.012672" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="body_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.89804 0.91765 0.92941 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="body_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="j0"
+    type="prismatic">
+    <origin
+      xyz="0.159800001842985 0 0.615"
+      rpy="1.5707963267949 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="body_link" />
+    <axis
+      xyz="0 1 0" />
+    <limit
+      lower="-0.3"
+      upper="0.3"
+      effort="100"
+      velocity="10" />
+    <dynamics
+      damping="5.0"
+      friction="1.0" />
+  </joint>
+  <link
+    name="LShP_Link">
+    <inertial>
+      <origin
+        xyz="-0.013031 -8.3122E-05 -0.078324"
+        rpy="0 0 0" />
+      <mass
+        value="2.0773" />
+      <inertia
+        ixx="0.0019773"
+        ixy="-1.8753E-09"
+        ixz="4.9862E-06"
+        iyy="0.001179"
+        iyz="2.8364E-07"
+        izz="3.5291747" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="LShP_Link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.66667 0.63922 0.61961 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="LShP_Link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="j1"
+    type="revolute">
+    <origin
+      xyz="0.0762 0.3943 -0.121"
+      rpy="0 0 0" />
+    <parent
+      link="body_link" />
+    <child
+      link="LShP_Link" />
+    <axis
+      xyz="0 0 -1" />
+    <limit
+      lower="-3.14"
+      upper="3.14"
+      effort="100"
+      velocity="10" />
+    <dynamics
+      damping="5.0"
+      friction="1.0" />
+  </joint>
+  <link
+    name="LShR_Link">
+    <inertial>
+      <origin
+        xyz="-0.020572 -0.12696 2.6805E-05"
+        rpy="0 0 0" />
+      <mass
+        value="1.9866" />
+      <inertia
+        ixx="3.5290873"
+        ixy="-8.7998E-05"
+        ixz="-8.3769E-08"
+        iyy="0.0014181"
+        iyz="-9.5082E-09"
+        izz="0.0010816" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="LShR_Link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.66667 0.63922 0.61961 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="LShR_Link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="j2"
+    type="revolute">
+    <origin
+      xyz="0.023 0 -0.089"
+      rpy="0 0 0" />
+    <parent
+      link="LShP_Link" />
+    <child
+      link="LShR_Link" />
+    <axis
+      xyz="1 0 0" />
+    <limit
+      lower="-3.14"
+      upper="3.14"
+      effort="100"
+      velocity="10" />
+    <dynamics
+      damping="5.0"
+      friction="1.0" />
+  </joint>
+  <link
+    name="LShY_Link">
+    <inertial>
+      <origin
+        xyz="-1.906E-06 -0.11912 -0.006149"
+        rpy="0 0 0" />
+      <mass
+        value="1.8888" />
+      <inertia
+        ixx="0.0011071"
+        ixy="-1.5167E-07"
+        ixz="2.2366E-08"
+        iyy="2.48980209"
+        iyz="1.2766E-05"
+        izz="0.0016413" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="LShY_Link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.66667 0.63922 0.61961 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="LShY_Link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="j3"
+    type="revolute">
+    <origin
+      xyz="-0.023 -0.1595 0"
+      rpy="0 0 0" />
+    <parent
+      link="LShR_Link" />
+    <child
+      link="LShY_Link" />
+    <axis
+      xyz="0 -1 0" />
+    <limit
+      lower="-3.14"
+      upper="3.14"
+      effort="100"
+      velocity="10" />
+    <dynamics
+      damping="5.0"
+      friction="1.0" />
+  </joint>
+  <link
+    name="LElP_Link">
+    <inertial>
+      <origin
+        xyz="-9.5593E-05 -0.10373 -0.0011155"
+        rpy="0 0 0" />
+      <mass
+        value="1.1558" />
+      <inertia
+        ixx="0.00046405"
+        ixy="-2.3865E-07"
+        ixz="-1.4191E-07"
+        iyy="0.00052408"
+        iyz="-5.4391E-05"
+        izz="2.4894565" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="LElP_Link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.66667 0.63922 0.61961 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="LElP_Link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="j4"
+    type="revolute">
+    <origin
+      xyz="0 -0.1305 0.004"
+      rpy="0 0 0" />
+    <parent
+      link="LShY_Link" />
+    <child
+      link="LElP_Link" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-3.14"
+      upper="3.14"
+      effort="100"
+      velocity="10" />
+    <dynamics
+      damping="5.0"
+      friction="1.0" />
+  </joint>
+  <link
+    name="LWrY_Link">
+    <inertial>
+      <origin
+        xyz="-4.2008E-05 -0.092156 -0.003711"
+        rpy="0 0 0" />
+      <mass
+        value="1.3048" />
+      <inertia
+        ixx="0.00065464"
+        ixy="-4.2304E-10"
+        ixz="5.1027E-08"
+        iyy="1.38329262"
+        iyz="4.7231E-07"
+        izz="0.00081507" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="LWrY_Link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.89804 0.89804 0.89804 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="LWrY_Link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="j5"
+    type="revolute">
+    <origin
+      xyz="0 -0.12411 -0.004"
+      rpy="0 0 0" />
+    <parent
+      link="LElP_Link" />
+    <child
+      link="LWrY_Link" />
+    <axis
+      xyz="0 -1 0" />
+    <limit
+      lower="-3.14"
+      upper="3.14"
+      effort="100"
+      velocity="10" />
+    <dynamics
+      damping="5.0"
+      friction="1.0" />
+  </joint>
+  <link
+    name="LWrP_Link">
+    <inertial>
+      <origin
+        xyz="0.0032734 -0.00018748 0.041704"
+        rpy="0 0 0" />
+      <mass
+        value="1.0771" />
+      <inertia
+        ixx="0.00042926"
+        ixy="2.6489E-07"
+        ixz="-3.0298E-09"
+        iyy="0.00029172"
+        iyz="7.7372E-09"
+        izz="1.38325031" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="LWrP_Link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 0.94902 0.9098 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="LWrP_Link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="j6"
+    type="revolute">
+    <origin
+      xyz="0 -0.16589 -0.042"
+      rpy="0 0 0" />
+    <parent
+      link="LWrY_Link" />
+    <child
+      link="LWrP_Link" />
+    <axis
+      xyz="0 0 -1" />
+    <limit
+      lower="-3.14"
+      upper="3.14"
+      effort="100"
+      velocity="10" />
+    <dynamics
+      damping="5.0"
+      friction="1.0" />
+  </joint>
+  <link
+    name="LWrR_Link">
+    <inertial>
+      <origin
+        xyz="0.010415 -0.037361 -1.1456E-06"
+        rpy="0 0 0" />
+      <mass
+        value="0.27656" />
+      <inertia
+        ixx="1.38315913"
+        ixy="4.197E-06"
+        ixz="-4.0659E-10"
+        iyy="8.6287E-05"
+        iyz="-3.8448E-09"
+        izz="0.00014558" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="LWrR_Link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.64706 0.61961 0.58824 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="LWrR_Link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="j7"
+    type="revolute">
+    <origin
+      xyz="0.0177 0 0.042"
+      rpy="0 0 0" />
+    <parent
+      link="LWrP_Link" />
+    <child
+      link="LWrR_Link" />
+    <axis
+      xyz="1 0 0" />
+    <limit
+      lower="-3.14"
+      upper="3.14"
+      effort="100"
+      velocity="10" />
+    <dynamics
+      damping="5.0"
+      friction="1.0" />
+  </joint>
+  <link
+    name="RShP_Link">
+    <inertial>
+      <origin
+        xyz="-0.013031 -8.2555E-05 0.078324"
+        rpy="0 0 0" />
+      <mass
+        value="2.0773" />
+      <inertia
+        ixx="0.0019773"
+        ixy="-2.7295E-08"
+        ixz="-4.9926E-06"
+        iyy="0.001179"
+        iyz="-3.0293E-07"
+        izz="3.5291747" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="RShP_Link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.66667 0.63922 0.61961 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="RShP_Link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="j8"
+    type="revolute">
+    <origin
+      xyz="0.0762 0.3943 0.121"
+      rpy="0 0 0" />
+    <parent
+      link="body_link" />
+    <child
+      link="RShP_Link" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-3.14"
+      upper="3.14"
+      effort="100"
+      velocity="10" />
+    <dynamics
+      damping="5.0"
+      friction="1.0" />
+  </joint>
+  <link
+    name="RShR_Link">
+    <inertial>
+      <origin
+        xyz="-0.020572 -0.12696 -2.6614E-05"
+        rpy="0 0 0" />
+      <mass
+        value="1.9866" />
+      <inertia
+        ixx="3.5290873"
+        ixy="-8.7998E-05"
+        ixz="9.1373E-08"
+        iyy="0.0014181"
+        iyz="-1.9602E-11"
+        izz="0.0010816" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="RShR_Link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.66667 0.63922 0.61961 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="RShR_Link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="j9"
+    type="revolute">
+    <origin
+      xyz="0.023 0 0.089"
+      rpy="0 0 0" />
+    <parent
+      link="RShP_Link" />
+    <child
+      link="RShR_Link" />
+    <axis
+      xyz="1 0 0" />
+    <limit
+      lower="-3.14"
+      upper="3.14"
+      effort="100"
+      velocity="10" />
+    <dynamics
+      damping="5.0"
+      friction="1.0" />
+  </joint>
+  <link
+    name="RShY_Link">
+    <inertial>
+      <origin
+        xyz="-1.1816E-06 -0.11912 0.006149"
+        rpy="0 0 0" />
+      <mass
+        value="1.8888" />
+      <inertia
+        ixx="0.0011071"
+        ixy="-1.517E-07"
+        ixz="4.0354E-09"
+        iyy="2.48980209"
+        iyz="-1.2766E-05"
+        izz="0.0016413" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="RShY_Link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.66667 0.63922 0.61961 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="RShY_Link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="j10"
+    type="revolute">
+    <origin
+      xyz="-0.023 -0.1595 0"
+      rpy="0 0 0" />
+    <parent
+      link="RShR_Link" />
+    <child
+      link="RShY_Link" />
+    <axis
+      xyz="0 -1 0" />
+    <limit
+      lower="-3.14"
+      upper="3.14"
+      effort="100"
+      velocity="10" />
+    <dynamics
+      damping="5.0"
+      friction="1.0" />
+  </joint>
+  <link
+    name="RElP_Link">
+    <inertial>
+      <origin
+        xyz="-0.00011214 -0.10373 0.0010998"
+        rpy="0 0 0" />
+      <mass
+        value="1.1558" />
+      <inertia
+        ixx="0.00046408"
+        ixy="-3.9133E-07"
+        ixz="1.4188E-07"
+        iyy="0.00052408"
+        iyz="5.4238E-05"
+        izz="2.48945648" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="RElP_Link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.66667 0.63922 0.61961 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="RElP_Link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="j11"
+    type="revolute">
+    <origin
+      xyz="0 -0.1305 -0.004"
+      rpy="0 0 0" />
+    <parent
+      link="RShY_Link" />
+    <child
+      link="RElP_Link" />
+    <axis
+      xyz="0 0 -1" />
+    <limit
+      lower="-3.14"
+      upper="3.14"
+      effort="100"
+      velocity="10" />
+    <dynamics
+      damping="5.0"
+      friction="1.0" />
+  </joint>
+  <link
+    name="RWrY_Link">
+    <inertial>
+      <origin
+        xyz="-5.7522E-05 -0.092145 0.0037353"
+        rpy="0 0 0" />
+      <mass
+        value="1.3048" />
+      <inertia
+        ixx="0.00065464"
+        ixy="4.2304E-10"
+        ixz="5.1027E-08"
+        iyy="1.38329262"
+        iyz="-4.7231E-07"
+        izz="0.00081507" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="RWrY_Link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.66667 0.63922 0.61961 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="RWrY_Link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="j12"
+    type="revolute">
+    <origin
+      xyz="0 -0.12411 0.004"
+      rpy="0 0 0" />
+    <parent
+      link="RElP_Link" />
+    <child
+      link="RWrY_Link" />
+    <axis
+      xyz="0 -1 0" />
+    <limit
+      lower="-3.14"
+      upper="3.14"
+      effort="100"
+      velocity="10" />
+    <dynamics
+      damping="5.0"
+      friction="1.0" />
+  </joint>
+  <link
+    name="RWrP_Link">
+    <inertial>
+      <origin
+        xyz="0.0022235 -0.00018748 -0.041704"
+        rpy="0 0 0" />
+      <mass
+        value="1.0771" />
+      <inertia
+        ixx="0.000429261"
+        ixy="2.6524E-07"
+        ixz="-5.4716E-09"
+        iyy="0.000291719"
+        iyz="7.7386E-09"
+        izz="1.38325031" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="RWrP_Link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.64706 0.61961 0.58824 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="RWrP_Link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="j13"
+    type="revolute">
+    <origin
+      xyz="0 -0.16589 0.042"
+      rpy="0 0 0" />
+    <parent
+      link="RWrY_Link" />
+    <child
+      link="RWrP_Link" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-3.14"
+      upper="3.14"
+      effort="100"
+      velocity="10" />
+    <dynamics
+      damping="5.0"
+      friction="1.0" />
+  </joint>
+  <link
+    name="RWrR_Link">
+    <inertial>
+      <origin
+        xyz="0.010415 -0.037361 -1.1456E-06"
+        rpy="0 0 0" />
+      <mass
+        value="0.27656" />
+      <inertia
+        ixx="1.38315913"
+        ixy="4.197E-06"
+        ixz="-4.0659E-10"
+        iyy="8.6287E-05"
+        iyz="-3.8448E-09"
+        izz="0.00014558" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="RWrR_Link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.64706 0.61961 0.58824 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="RWrR_Link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="j14"
+    type="revolute">
+    <origin
+      xyz="0.0177 0 -0.042"
+      rpy="0 0 0" />
+    <parent
+      link="RWrP_Link" />
+    <child
+      link="RWrR_Link" />
+    <axis
+      xyz="1 0 0" />
+    <limit
+      lower="-3.14"
+      upper="3.14"
+      effort="100"
+      velocity="10" />
+    <dynamics
+      damping="5.0"
+      friction="1.0" />
+    <!-- <mimic
+      joint="j7"
+      multiplier="1"
+      offset="0" /> -->
+  </joint>
+	
+  <!-- base -->
+  <link name="rh_p12_rn_base">
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="LHandbase_Link.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+    </collision>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="LHandbase_Link.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.2 0.2 0.2 1.0"/>
+      </material>
+    </visual>
+    <inertial>
+      <origin rpy="0 0 0" xyz="0.000 0.000 0.032"/>
+      <mass value="0.236"/>
+      <inertia ixx="1.0" ixy="0.0" ixz="0.0" iyy="1.0" iyz="0.0" izz="1.0"/>
+    </inertial>
+  </link>
+  <!-- Joint -->
+  <joint name="rh_r1" type="revolute">
+    <parent link="rh_p12_rn_base"/>
+    <child link="rh_p12_rn_r1"/>
+    <origin rpy="0 0 0" xyz="0.0 0.008 0.048"/>
+    <axis xyz="1 0 0"/>
+    <limit effort="1000" lower="0.0" upper="1.1" velocity="6.5"/>
+    <dynamics damping="0.7"/>
+  </joint>
+  <!-- rh_p12_rn_r1 -->
+  <link name="rh_p12_rn_r1">
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="r1.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+    </collision>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="r1.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.2 0.2 0.2 1.0"/>
+      </material>
+    </visual>
+    <inertial>
+      <origin rpy="0 0 0" xyz="0.000 0.034 0.004"/>
+      <mass value="0.068"/>
+      <inertia ixx="1.0" ixy="0.0" ixz="0.0" iyy="1.0" iyz="0.0" izz="1.0"/>
+    </inertial>
+  </link>
+  <!-- Right Joint 2 -->
+  <joint name="rh_r2" type="revolute">
+    <parent link="rh_p12_rn_r1"/>
+    <child link="rh_p12_rn_r2"/>
+    <origin rpy="0 0 0" xyz="0.0 0.0493634 0.0285"/>
+    <axis xyz="-1 0 0"/>
+    <limit effort="1000" lower="0.0" upper="1.0" velocity="6.5"/>
+    <dynamics damping="0.7"/>
+  </joint>
+  <!-- rh_p12_rn_r2 -->
+  <link name="rh_p12_rn_r2">
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="r2.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+    </collision>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="r2.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.2 0.2 0.2 1.0"/>
+      </material>
+    </visual>
+    <inertial>
+      <origin rpy="0 0 0" xyz="0.000 0.006 0.011"/>
+      <mass value="0.022"/>
+      <inertia ixx="1.0" ixy="0.0" ixz="0.0" iyy="1.0" iyz="0.0" izz="1.0"/>
+    </inertial>
+  </link>
+  <!-- Left Joint 1 -->
+  <joint name="rh_l1" type="revolute">
+    <parent link="rh_p12_rn_base"/>
+    <child link="rh_p12_rn_l1"/>
+    <origin rpy="0 0 0" xyz="0.0 -0.008 0.048"/>
+    <axis xyz="-1 0 0"/>
+    <limit effort="1000" lower="0.0" upper="1.1" velocity="6.5"/>
+    <dynamics damping="0.7"/>
+  </joint>
+  <!-- rh_p12_rn_l1 -->
+  <link name="rh_p12_rn_l1">
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="l1.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+    </collision>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="l1.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.2 0.2 0.2 1.0"/>
+      </material>
+    </visual>
+    <inertial>
+      <origin rpy="0 0 0" xyz="0.000 -0.034 0.004"/>
+      <mass value="0.068"/>
+      <inertia ixx="1.0" ixy="0.0" ixz="0.0" iyy="1.0" iyz="0.0" izz="1.0"/>
+    </inertial>
+  </link>
+  <!-- Left Joint 2 -->
+  <joint name="rh_l2" type="revolute">
+    <parent link="rh_p12_rn_l1"/>
+    <child link="rh_p12_rn_l2"/>
+    <origin rpy="0 0 0" xyz="0.0 -0.0493634 0.0285"/>
+    <axis xyz="1 0 0"/>
+    <limit effort="1000" lower="0.0" upper="1.0" velocity="6.5"/>
+    <dynamics damping="0.7"/>
+  </joint>
+  <!-- rh_p12_rn_l2 -->
+  <link name="rh_p12_rn_l2">
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="l2.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+    </collision>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="l2.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.2 0.2 0.2 1.0"/>
+      </material>
+    </visual>
+    <inertial>
+      <origin rpy="0 0 0" xyz="0.000 -0.006 0.011"/>
+      <mass value="0.022"/>
+      <inertia ixx="1.0" ixy="0.0" ixz="0.0" iyy="1.0" iyz="0.0" izz="1.0"/>
+    </inertial>
+  </link>
+  <joint name="LHand_joint" type="fixed">
+    <origin
+      xyz="-0.0177 -0.080748 0"
+      rpy="1.5708 1.5708 0" />
+    <parent link="LWrR_Link"/>
+    <child link="rh_p12_rn_base"/>
+  </joint>
+  <link
+    name="RHandbase_Link">
+    <inertial>
+      <origin
+        xyz="-0.00034988 -0.0015951 -0.053958"
+        rpy="0 0 0" />
+      <mass
+        value="0.15198" />
+      <inertia
+        ixx="5.1404E-05"
+        ixy="-1.585E-08"
+        ixz="2.4239E-08"
+        iyy="3.5359E-05"
+        iyz="4.4231E-06"
+        izz="3.2927E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="RHandbase_Link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.75294 0.75294 0.75294 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="RHandbase_Link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="RHBase"
+    type="fixed">
+    <origin
+      xyz="-0.0177 -0.080748 0"
+      rpy="-1.5708 -1.5708 0" />
+    <parent
+      link="RWrR_Link" />
+    <child
+      link="RHandbase_Link" />
+    <axis
+      xyz="0 0 0" />
+    <limit
+      effort="0"
+      velocity="0" />
+  </joint>
+  <link
+    name="Hand_RT1">
+    <inertial>
+      <origin
+        xyz="5.49453180311542E-05 0.0141589395056247 -0.00742960343485388"
+        rpy="0 0 0" />
+      <mass
+        value="0.0206488185480908" />
+      <inertia
+        ixx="1.87139644040444E-06"
+        ixy="-3.68276830732875E-09"
+        ixz="8.77796860820766E-10"
+        iyy="1.36037580141996E-06"
+        iyz="3.60343020311637E-08"
+        izz="9.69993577847323E-07" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="Hand_RT1.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.752941176470588 0.752941176470588 0.752941176470588 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="Hand_RT1.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="RT1"
+    type="revolute">
+    <origin
+      xyz="0.006325 0.010945 -0.044721"
+      rpy="3.0543 0 3.1416" />
+    <parent
+      link="RHandbase_Link" />
+    <child
+      link="Hand_RT1" />
+    <axis
+      xyz="0 0 1" /> <!--xyz="0 0 -1" />-->
+    <limit
+      lower="-3.14"
+      upper="3.14"
+      effort="200"
+      velocity="10" />
+    <dynamics
+      damping="0.1"
+      friction="0.1" />
+  </joint>
+  <link
+    name="Hand_RT2">
+    <inertial>
+      <origin
+        xyz="-2.98451888203211E-12 0.000573264282457409 0.00797915198194427"
+        rpy="0 0 0" />
+      <mass
+        value="0.00152598624013964" />
+      <inertia
+        ixx="6.01888401624109E-08"
+        ixy="1.29558068768742E-16"
+        ixz="-1.75878509494189E-16"
+        iyy="3.40749682145381E-08"
+        iyz="-2.35613785746893E-10"
+        izz="5.3869251546022E-08" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="Hand_RT2.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.752941176470588 0.752941176470588 0.752941176470588 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="Hand_RT2.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="RT2"
+    type="revolute">
+    <origin
+      xyz="5E-05 0.0441 0"
+      rpy="-1.5708 0 -3.1416" />
+    <parent
+      link="Hand_RT1" />
+    <child
+      link="Hand_RT2" />
+    <axis
+      xyz="0 0 1" /> <!--xyz="0 0 -1" />-->
+    <limit
+      lower="-3.14"
+      upper="3.14"
+      effort="200"
+      velocity="10" />
+    <dynamics
+      damping="0.1"
+      friction="0.1" />
+  </joint>
+  <link
+    name="Hand_RT3">
+    <inertial>
+      <origin
+        xyz="0.0200500000003899 0.00046981180728364 -0.000500000000021816"
+        rpy="0 0 0" />
+      <mass
+        value="0.0341378762034901" />
+      <inertia
+        ixx="1.55095491954362E-06"
+        ixy="1.52991399830316E-20"
+        ixz="5.14679947105511E-08"
+        iyy="3.07194883419817E-06"
+        iyz="2.34218964432158E-16"
+        izz="2.03699339503977E-06" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="Hand_RT3.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.752941176470588 0.752941176470588 0.752941176470588 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="Hand_RT3.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="RT3"
+    type="revolute">
+    <origin
+      xyz="0 0 0"
+      rpy="0 1.5708 1.5708" />
+    <parent
+      link="Hand_RT2" />
+    <child
+      link="Hand_RT3" />
+    <axis
+      xyz="0 0 -1" /> <!--xyz="0 0 1"-->
+    <limit
+      lower="-3.14"
+      upper="3.14"
+      effort="200"
+      velocity="10" />
+    <dynamics
+      damping="0.1"
+      friction="0.1" />
+  </joint>
+  <link
+    name="Hand_RT4">
+    <inertial>
+      <origin
+        xyz="0.0191981849639985 6.45169196355029E-05 -0.000413500558168245"
+        rpy="0 0 0" />
+      <mass
+        value="0.00982919949661632" />
+      <inertia
+        ixx="4.97802243662013E-07"
+        ixy="2.47612863030204E-08"
+        ixz="2.1141087692782E-10"
+        iyy="6.05942781284524E-07"
+        iyz="2.35196143972078E-11"
+        izz="3.88556643270007E-07" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="Hand_RT4.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.752941176470588 0.752941176470588 0.752941176470588 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="Hand_RT4.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="RT4"
+    type="revolute">
+    <origin
+      xyz="0.0401000000000001 0 -0.000675000000000314"
+      rpy="0 0 0" />
+    <parent
+      link="Hand_RT3" />
+    <child
+      link="Hand_RT4" />
+    <axis
+      xyz="0 0 -1" />
+    <limit
+      lower="-3.14"
+      upper="3.14"
+      effort="200"
+      velocity="10" />
+    <dynamics
+      damping="0.1"
+      friction="0.1" />
+  </joint>
+  <link
+    name="Hand_RF1J1">
+    <inertial>
+      <origin
+        xyz="-2.49921784656326E-12 0.00012434607868983 -0.00799875217440105"
+        rpy="0 0 0" />
+      <mass
+        value="0.00152598624013965" />
+      <inertia
+        ixx="6.01888401624112E-08"
+        ixy="-1.44394209395132E-16"
+        ixz="1.63917409908452E-16"
+        iyy="3.42662419397252E-08"
+        iyz="-1.95065489728784E-09"
+        izz="5.36779778208354E-08" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="Hand_RF1J1.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.752941176470588 0.752941176470588 0.752941176470588 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="Hand_RF1J1.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="RF1J1"
+    type="revolute">
+    <origin
+      xyz="-0.006325 0.033168 -0.11515"
+      rpy="3.1416 0 0" />
+    <parent
+      link="RHandbase_Link" />
+    <child
+      link="Hand_RF1J1" />
+    <axis
+      xyz="0 0.087156 -0.99619" />
+    <limit
+      lower="-3.14"
+      upper="3.14"
+      effort="200"
+      velocity="10" />
+    <dynamics
+      damping="0.1"
+      friction="0.1" />
+  </joint>
+  <link
+    name="Hand_RF1J2">
+    <inertial>
+      <origin
+        xyz="0.0200500000000374 0.000469811807283608 4.05647737622417E-13"
+        rpy="0 0 0" />
+      <mass
+        value="0.0341378762034902" />
+      <inertia
+        ixx="1.55095491954362E-06"
+        ixy="1.71004102897169E-20"
+        ixz="5.14679947105533E-08"
+        iyy="3.07194883419817E-06"
+        iyz="2.34218966333191E-16"
+        izz="2.03699339503977E-06" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="Hand_RF1J2.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.752941176470588 0.752941176470588 0.752941176470588 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="Hand_RF1J2.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="RF1J2"
+    type="revolute">
+    <origin
+      xyz="0 0.0004981 4.3578E-05"
+      rpy="3.1416 -1.4835 -1.5708" />
+    <parent
+      link="Hand_RF1J1" />
+    <child
+      link="Hand_RF1J2" />
+    <axis
+      xyz="0 0 -1" /> <!--xyz="0 0 1"-->
+    <limit
+      lower="-3.14"
+      upper="3.14"
+      effort="200"
+      velocity="10" />
+    <dynamics
+      damping="0.1"
+      friction="0.1" />
+  </joint>
+  <link
+    name="Hand_RF1J3">
+    <inertial>
+      <origin
+        xyz="0.021345 0.00045246 -0.00026275"
+        rpy="0 0 0" />
+      <mass
+        value="0.017723" />
+      <inertia
+        ixx="7.8208E-07"
+        ixy="1.2845E-16"
+        ixz="2.5519E-08"
+        iyy="1.5787E-06"
+        iyz="-2.6851E-16"
+        izz="1.0666E-06" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="Hand_RF1J3.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.75294 0.75294 0.75294 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="Hand_RF1J3.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="RF1J3"
+    type="revolute">
+    <origin
+      xyz="0.0401 0 -0.000125"
+      rpy="0 0 0" />
+    <parent
+      link="Hand_RF1J2" />
+    <child
+      link="Hand_RF1J3" />
+    <axis
+      xyz="0 0 -1" />
+    <limit
+      lower="-3.14"
+      upper="3.14"
+      effort="200"
+      velocity="10" />
+    <dynamics
+      damping="0.1"
+      friction="0.1" />
+  </joint>
+  <link
+    name="Hand_RF1J4">
+    <inertial>
+      <origin
+        xyz="0.019198 6.4517E-05 -0.0004135"
+        rpy="0 0 0" />
+      <mass
+        value="0.0098292" />
+      <inertia
+        ixx="4.978E-07"
+        ixy="2.4761E-08"
+        ixz="2.1141E-10"
+        iyy="6.0594E-07"
+        iyz="2.352E-11"
+        izz="3.8856E-07" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="Hand_RF1J4.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.75294 0.75294 0.75294 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="Hand_RF1J4.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="RF1J4"
+    type="revolute">
+    <origin
+      xyz="0.03005 0 -5E-05"
+      rpy="0 0 0" />
+    <parent
+      link="Hand_RF1J3" />
+    <child
+      link="Hand_RF1J4" />
+    <axis
+      xyz="0 0 -1" />
+    <limit
+      lower="-3.14"
+      upper="3.14"
+      effort="200"
+      velocity="10" />
+    <dynamics
+      damping="0.1"
+      friction="0.1" />
+  </joint>
+  <link
+    name="Hand_RF2J1">
+    <inertial>
+      <origin
+        xyz="-2.49577442046345E-12 -0.000573266382514537 -0.00797915141575523"
+        rpy="0 0 0" />
+      <mass
+        value="0.00152598652963305" />
+      <inertia
+        ixx="6.01888517729958E-08"
+        ixy="-1.1084366921706E-16"
+        ixz="2.38333900451093E-16"
+        iyy="3.40749814067045E-08"
+        iyz="-2.35613929939573E-10"
+        izz="5.38692550191678E-08" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="Hand_RF2J1.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.752941176470588 0.752941176470588 0.752941176470588 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="Hand_RF2J1.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="RF2J1"
+    type="revolute">
+    <origin
+      xyz="-0.006325 0 -0.1166"
+      rpy="3.1416 0 0" />
+    <parent
+      link="RHandbase_Link" />
+    <child
+      link="Hand_RF2J1" />
+    <axis
+      xyz="0 0 -1" />
+    <limit
+      lower="-3.14"
+      upper="3.14"
+      effort="200"
+      velocity="10" />
+    <dynamics
+      damping="0.1"
+      friction="0.1" />
+  </joint>
+  <link
+    name="Hand_RF2J2">
+    <inertial>
+      <origin
+        xyz="0.0200500000000031 0.00046981180722754 3.91575660785293E-13"
+        rpy="0 0 0" />
+      <mass
+        value="0.0341378762027317" />
+      <inertia
+        ixx="1.55095491953695E-06"
+        ixy="6.23329589486961E-22"
+        ixz="5.14679947104184E-08"
+        iyy="3.07194883415059E-06"
+        iyz="2.34279373277244E-16"
+        izz="2.03699339498727E-06" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="Hand_RF2J2.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.752941176470588 0.752941176470588 0.752941176470588 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="Hand_RF2J2.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="RF2J2"
+    type="revolute">
+    <origin
+      xyz="0 0.0005 0"
+      rpy="1.5708 -1.5708 0" />
+    <parent
+      link="Hand_RF2J1" />
+    <child
+      link="Hand_RF2J2" />
+    <axis
+      xyz="0 0 -1" /> <!--xyz="0 0 1"-->
+    <limit
+      lower="-3.14"
+      upper="3.14"
+      effort="200"
+      velocity="10" />
+    <dynamics
+      damping="0.1"
+      friction="0.1" />
+  </joint>
+  <link
+    name="Hand_RF2J3">
+    <inertial>
+      <origin
+        xyz="0.0213452527304098 0.000452462897240257 -0.000262751115906623"
+        rpy="0 0 0" />
+      <mass
+        value="0.0177234171241366" />
+      <inertia
+        ixx="7.82077647012838E-07"
+        ixy="2.76624022495768E-16"
+        ixz="2.55189728645645E-08"
+        iyy="1.57867985630483E-06"
+        iyz="-2.31451348978401E-16"
+        izz="1.06661938708983E-06" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="Hand_RF2J3.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.752941176470588 0.752941176470588 0.752941176470588 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="Hand_RF2J3.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="RF2J3"
+    type="revolute">
+    <origin
+      xyz="0.0401 0 -0.000125"
+      rpy="0 0 0" />
+    <parent
+      link="Hand_RF2J2" />
+    <child
+      link="Hand_RF2J3" />
+    <axis
+      xyz="0 0 -1" />
+    <limit
+      lower="-3.14"
+      upper="3.14"
+      effort="200"
+      velocity="10" />
+    <dynamics
+      damping="0.1"
+      friction="0.1" />
+  </joint>
+  <link
+    name="Hand_RF2J4">
+    <inertial>
+      <origin
+        xyz="0.0191981611653529 6.45145181326703E-05 -0.000413505079297327"
+        rpy="0 0 0" />
+      <mass
+        value="0.00982919734972211" />
+      <inertia
+        ixx="4.97803804520722E-07"
+        ixy="2.47624846928102E-08"
+        ixz="2.11732681973548E-10"
+        iyy="6.05941737288898E-07"
+        iyz="2.34361136094944E-11"
+        izz="3.88555902771411E-07" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="Hand_RF2J4.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.752941176470588 0.752941176470588 0.752941176470588 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="Hand_RF2J4.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="RF2J4"
+    type="revolute">
+    <origin
+      xyz="0.03005 0 -5E-05"
+      rpy="0 0 0" />
+    <parent
+      link="Hand_RF2J3" />
+    <child
+      link="Hand_RF2J4" />
+    <axis
+      xyz="0 0 -1" />
+    <limit
+      lower="-3.14"
+      upper="3.14"
+      effort="200"
+      velocity="10" />
+    <dynamics
+      damping="0.1"
+      friction="0.1" />
+  </joint>
+  <link
+    name="Hand_RF3J1">
+    <inertial>
+      <origin
+        xyz="-3.15674569817403E-13 -0.00126651418198945 -0.00789882511853457"
+        rpy="0 0 0" />
+      <mass
+        value="0.00152598635461991" />
+      <inertia
+        ixx="6.01888448277348E-08"
+        ixy="-1.1532460852351E-16"
+        ixz="2.6269492449962E-16"
+        iyy="3.41844195139192E-08"
+        iyz="1.48658590401027E-09"
+        izz="5.3759806539206E-08" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="Hand_RF3J1.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.752941176470588 0.752941176470588 0.752941176470588 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="Hand_RF3J1.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="RF3J1"
+    type="revolute">
+    <origin
+      xyz="-0.006325 -0.033168 -0.11515"
+      rpy="3.1416 0 0" />
+    <parent
+      link="RHandbase_Link" />
+    <child
+      link="Hand_RF3J1" />
+    <axis
+      xyz="0 -0.087156 -0.99619" />
+    <limit
+      lower="-3.14"
+      upper="3.14"
+      effort="200"
+      velocity="10" />
+    <dynamics
+      damping="0.1"
+      friction="0.1" />
+  </joint>
+  <link
+    name="Hand_RF3J2">
+    <inertial>
+      <origin
+        xyz="0.0200499999999694 0.000469811807150606 3.74589248508528E-13"
+        rpy="0 0 0" />
+      <mass
+        value="0.0341378762034901" />
+      <inertia
+        ixx="1.55095491954361E-06"
+        ixy="-1.56201314452556E-20"
+        ixz="5.14679947102835E-08"
+        iyy="3.07194883419817E-06"
+        iyz="2.3421899190864E-16"
+        izz="2.03699339503977E-06" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="Hand_RF3J2.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.752941176470588 0.752941176470588 0.752941176470588 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="Hand_RF3J2.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="RF3J2"
+    type="revolute">
+    <origin
+      xyz="0 0.0004981 -4.3578E-05"
+      rpy="0 -1.4835 1.5708" />
+    <parent
+      link="Hand_RF3J1" />
+    <child
+      link="Hand_RF3J2" />
+    <axis
+      xyz="0 0 -1" /> <!--xyz="0 0 1"-->
+    <limit
+      lower="-3.14"
+      upper="3.14"
+      effort="200"
+      velocity="10" />
+    <dynamics
+      damping="0.1"
+      friction="0.1" />
+  </joint>
+  <link
+    name="Hand_RF3J3">
+    <inertial>
+      <origin
+        xyz="0.0213452529451178 0.000452462904718141 -0.000262751253703508"
+        rpy="0 0 0" />
+      <mass
+        value="0.017723416829923" />
+      <inertia
+        ixx="7.82077644288634E-07"
+        ixy="3.40153329904134E-16"
+        ixz="2.55189726226308E-08"
+        iyy="1.57867983086211E-06"
+        iyz="-2.56838162261014E-16"
+        izz="1.06661935960439E-06" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="Hand_RF3J3.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.752941176470588 0.752941176470588 0.752941176470588 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="Hand_RF3J3.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="RF3J3"
+    type="revolute">
+    <origin
+      xyz="0.0401 0 -0.000125"
+      rpy="0 0 0" />
+    <parent
+      link="Hand_RF3J2" />
+    <child
+      link="Hand_RF3J3" />
+    <axis
+      xyz="0 0 -1" />
+    <limit
+      lower="-3.14"
+      upper="3.14"
+      effort="200"
+      velocity="10" />
+    <dynamics
+      damping="0.1"
+      friction="0.1" />
+  </joint>
+  <link
+    name="Hand_RF3J4">
+    <inertial>
+      <origin
+        xyz="0.0191981584943398 6.45210420670023E-05 -0.000413504232207151"
+        rpy="0 0 0" />
+      <mass
+        value="0.00982918937760021" />
+      <inertia
+        ixx="4.97803815575106E-07"
+        ixy="2.47620486663349E-08"
+        ixz="2.11625749233638E-10"
+        iyy="6.05941330685091E-07"
+        iyz="2.31511129566794E-11"
+        izz="3.8855529908188E-07" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="Hand_RF3J4.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.752941176470588 0.752941176470588 0.752941176470588 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="Hand_RF3J4.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="RF3J4"
+    type="revolute">
+    <origin
+      xyz="0.03005 0 -5E-05"
+      rpy="0 0 0" />
+    <parent
+      link="Hand_RF3J3" />
+    <child
+      link="Hand_RF3J4" />
+    <axis
+      xyz="0 0 -1" />
+    <limit
+      lower="-3.14"
+      upper="3.14"
+      effort="200"
+      velocity="10" />
+    <dynamics
+      damping="0.1"
+      friction="0.1" />
+  </joint>
+</robot>

@@ -287,10 +287,6 @@ void CRobotControl::getFeedbackInformation(const mjData* data)
 
 void CRobotControl::computeControlInput()
 {
-	qpos_d.setZero();
-	qvel_d.setZero();
-	qacc_d.setZero();
-
 	if(sim_time <= TORQUE_ON){
 		computeJointTorque(JOINT_PD);
 	}
@@ -300,17 +296,19 @@ void CRobotControl::computeControlInput()
 	}
 	else
 	{
-		JointPlanner(INITIAL_POSE);
-		// JointPlanner();
-#if defined(YORI)
-	computeJointTorque(JOINT_PD);
-#elif defined(ArmHand)
-	computeJointTorque(JOINT_PD);
-#elif defined(DualArm)
-	computeJointTorque(JOINT_PD);
-#elif defined(DualArmHand)
-	computeJointTorque(JOINT_PD);
-#endif
+		joint_torq = robot.M_mat * (K_qp * (qpos_d - robot.q) + K_qv * (qvel_d - robot.qdot)) + robot.C_mat * robot.qdot + robot.g_vec;
+// 		// if(sim_time <= )
+// 		JointPlanner(INITIAL_POSE);
+// 		// JointPlanner();
+// #if defined(YORI)
+// 	computeJointTorque(JOINT_PD);
+// #elif defined(ArmHand)
+// 	computeJointTorque(JOINT_PD);
+// #elif defined(DualArm)
+// 	computeJointTorque(JOINT_PD);
+// #elif defined(DualArmHand)
+// 	computeJointTorque(JOINT_PD);
+// #endif
 	}
 }
 
@@ -318,15 +316,18 @@ void CRobotControl::JointPlanner(double duration)
 {
 	if(Joint_Traj.is_moving_ == false)
 	{
-		Joint_Traj.setTargetPosition(robot.q, qpos_ref, duration, 1 / 1000.0, QUINTIC);
+		std::cout << "[" << sim_time << "] At JointPlanner" << std::endl;
+		Joint_Traj.setTargetPosition(robot.q, qpos_ref, duration, 1 / 1000.0, CUBIC);
 	}
 	Joint_Traj.computeTraj(qpos_d, qvel_d, qacc_d);
 }
 
 void CRobotControl::computeJointTorque(CtrlType type)
 {
-	if(type == JOINT_PD)
-		joint_torq = qacc_d + K_qp * (qpos_d - robot.q) + K_qv * (qvel_d - robot.qdot);
+	if(type == JOINT_PD) {
+		// joint_torq = qacc_d + K_qp * (qpos_d - robot.q) + K_qv * (qvel_d - robot.qdot);
+		joint_torq = K_qp * (qpos_d - robot.q) + K_qv * (qvel_d - robot.qdot);
+	}
 }
 
 

@@ -1,0 +1,30 @@
+controller_manager:
+  ros__parameters:
+    update_rate: 1000  # Hz
+
+    position_controllers:
+      type: position_controllers/JointGroupPositionController
+
+    joint_state_broadcaster:
+      type: joint_state_broadcaster/JointStateBroadcaster
+
+position_controllers:
+  ros__parameters:
+    joints:
+      - yori_joint_body
+      - yori_joint_l1
+      - yori_joint_l2
+      - yori_joint_l3
+      - yori_joint_l4
+      - yori_joint_l5
+      - yori_joint_r1
+      - yori_joint_r2
+      - yori_joint_r3
+      - yori_joint_r4
+      - yori_joint_r5
+    command_interfaces:
+      - position
+    state_interfaces:
+      - position
+      - velocity
+      - effort

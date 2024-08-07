@@ -1,0 +1,35 @@
+<?xml version='1.0' encoding='utf-8'?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="yori">
+  <xacro:arg name="arm_id" default="yori"/>
+  <xacro:arg name="position_mode" default="true"/>
+  <xacro:arg name="effort_mode" default="false"/>
+  <xacro:arg name="trajectory_mode" default="false"/>  
+
+  <xacro:include filename="/home/donghun/ros_ws/yori/src/yori_description/urdf/yori_urdf.xacro"/>
+  <xacro:yori_urdf arm_id="$(arg arm_id)"/>
+
+  <xacro:include filename="/home/donghun/ros_ws/yori/src/yori_description/urdf/yori_gazebo.xacro"/>
+  <xacro:yori_gazebo ns="$(arg arm_id)" position_mode="$(arg position_mode)" effort_mode="$(arg effort_mode)" trajectory_mode="$(arg trajectory_mode)"/>
+
+  <xacro:if value="$(arg position_mode)">
+    <gazebo>
+      <plugin filename="libgazebo_ros2_control.so" name="gazebo_ros2_control">
+          <parameters>/home/donghun/ros_ws/yori/src/yori_description/config/yori_controller_position.yaml</parameters>
+      </plugin>
+    </gazebo>
+  </xacro:if>
+  <xacro:if value="$(arg effort_mode)">
+    <gazebo>
+      <plugin filename="libgazebo_ros2_control.so" name="gazebo_ros2_control">
+          <parameters>/home/donghun/ros_ws/yori/src/yori_description/config/yori_controller_effort.yaml</parameters>
+      </plugin>
+    </gazebo>
+  </xacro:if>
+  <xacro:if value="$(arg trajectory_mode)">
+    <gazebo>
+      <plugin filename="libgazebo_ros2_control.so" name="gazebo_ros2_control">
+          <parameters>/home/donghun/ros_ws/yori/src/yori_description/config/yori_controller_trajectory.yaml</parameters>
+      </plugin>
+    </gazebo>    
+  </xacro:if>
+</robot>

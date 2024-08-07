@@ -51,8 +51,8 @@ constexpr double g_const = 9.81;
 /////////////////////////////////////////////////
 // #define YORI        //	YORI
 // #define ArmHand		//  KIST 6-DoF Arm & Hand
-#define DualArm		//  KIST 7-DoF Dual Arm + Torso
-// #define DualArmHand	//  KIST 7-DoF Dual Arm + Hand/Gripper w Torso
+// #define DualArm		//  KIST 7-DoF Dual Arm + Torso
+#define DualArmHand	//  KIST 7-DoF Dual Arm + Hand/Gripper w Torso
 
 
 

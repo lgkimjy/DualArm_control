@@ -1,0 +1,247 @@
+<mujoco model="KIST-Hand">
+	<compiler angle="radian" coordinate="local" inertiafromgeom="false" autolimits="true" meshdir="Meshes"/>
+
+	<option	timestep="0.0004" gravity="0 0 -9.81" integrator="Euler" o_solref="0.005 0.2" o_solimp="0.95 0.98 0.01 0.5 2"
+					cone="elliptic" jacobian="auto" solver="Newton" tolerance="1e-10" impratio="0.7"/>
+
+	<option>
+		<flag gravity="enable" override="enable"/>
+	</option>
+
+	<visual>
+		<global fovy="45" linewidth="2" glow="0.5" realtime="1"/>
+		<quality shadowsize="4096" numslices="48"/>
+		<headlight ambient="0.5 0.5 0.5" diffuse="0.1 0.1 0.1" specular="1 1 1"/>
+		<scale forcewidth="0.05" contactwidth="0.15" contactheight="0.1" com="0.2" jointlength="1.0" jointwidth="0.05"
+					 actuatorlength="0.5" actuatorwidth="0.3" framelength="1.5" framewidth="0.05"/>
+		<rgba haze="0.6 0.8 0.9 1" force="1 0 0 0.5" com="0 0 1 1"/>
+	</visual>
+	
+	<default>
+		<geom contype="1" conaffinity="1" condim="3" margin="0.001" material="MatLink" rgba="0.4 0.5 0.5 1"/>
+		<joint limited="false" damping="0.03" armature="0.01" stiffness="0" frictionloss="0.01"/>
+	</default>
+
+	<asset>
+		<texture name="texplane" type="2d"     builtin="checker"  width="512" height="512" mark="edge"  
+						 rgb1="0.2 0.3 0.4" rgb2="0.1 0.1 0.2" markrgb="1 1 1"/>
+		<texture name="texgeom"  type="cube"   builtin="flat"     width="512" height="512" mark="cross" 
+						 rgb1="0.8 0.6 0.4" rgb2="0.8 0.6 0.4" markrgb="1 1 1"/>
+		<texture name="sky"      type="skybox" builtin="gradient" width="512" height="512" 
+						 rgb1="1 1 1" rgb2="0.6 0.8 1"/>
+
+		<material name="MatGnd" reflectance="0" specular="1" shininess="0.1" rgba="0 0.5 0.5 1"/>
+		<material name="MatLink" emission="0" reflectance='0.5' specular="1" shininess="0.8"/>
+		<material name="MatGeom" texture="texgeom" texuniform="true"/>
+		<material name="MatPlane" texture="texplane" reflectance='0' texrepeat="1 1" texuniform="true"/>
+	</asset>
+	<!-- ######################################################################### -->
+
+	<asset>
+		<mesh name="base_link" file="base_link.STL" />
+		<mesh name="body_link" file="body_link.STL" />
+		<mesh name="RArmJ1_Link" file="RArmJ1_Link.STL" />
+		<mesh name="RArmJ2_Link" file="RArmJ2_Link.STL" />
+		<mesh name="RArmJ3_Link" file="RArmJ3_Link.STL" />
+		<mesh name="RArmJ4_Link" file="RArmJ4_Link.STL" />
+		<mesh name="RArmJ5_Link" file="RArmJ5_Link.STL" />
+		<mesh name="RArmJ6_Link" file="RArmJ6_Link.STL" />
+		<mesh name="Hand_RT1" file="Hand_RT1.STL" />
+		<mesh name="Hand_RT2" file="Hand_RT2.STL" />
+		<mesh name="Hand_RT3" file="Hand_RT3.STL" />
+		<mesh name="Hand_RT4" file="Hand_RT4.STL" />
+		<mesh name="Hand_RF1J1" file="Hand_RF1J1.STL" />
+		<mesh name="Hand_RF1J2" file="Hand_RF1J2.STL" />
+		<mesh name="Hand_RF1J3" file="Hand_RF1J3.STL" />
+		<mesh name="Hand_RF1J4" file="Hand_RF1J4.STL" />
+		<mesh name="Hand_RF2J1" file="Hand_RF2J1.STL" />
+		<mesh name="Hand_RF2J2" file="Hand_RF2J2.STL" />
+		<mesh name="Hand_RF2J3" file="Hand_RF2J3.STL" />
+		<mesh name="Hand_RF2J4" file="Hand_RF2J4.STL" />
+		<mesh name="Hand_RF3J1" file="Hand_RF3J1.STL" />
+		<mesh name="Hand_RF3J2" file="Hand_RF3J2.STL" />
+		<mesh name="Hand_RF3J3" file="Hand_RF3J3.STL" />
+		<mesh name="Hand_RF3J4" file="Hand_RF3J4.STL" />
+		<mesh name="LArmJ1_Link" file="LArmJ1_Link.STL" />
+		<mesh name="LArmJ2_Link" file="LArmJ2_Link.STL" />
+		<mesh name="LArmJ3_Link" file="LArmJ3_Link.STL" />
+		<mesh name="LArmJ4_Link" file="LArmJ4_Link.STL" />
+		<mesh name="LArmJ5_Link" file="LArmJ5_Link.STL" />
+		<mesh name="LArmJ6_Link" file="LArmJ6_Link.STL" />
+		<mesh name="Hand_LT1" file="Hand_LT1.STL" />
+		<mesh name="Hand_LT2" file="Hand_LT2.STL" />
+		<mesh name="Hand_LT3" file="Hand_LT3.STL" />
+		<mesh name="Hand_LT4" file="Hand_LT4.STL" />
+		<mesh name="Hand_LF1J1" file="Hand_LF1J1.STL" />
+		<mesh name="Hand_LF1J2" file="Hand_LF1J2.STL" />
+		<mesh name="Hand_LF1J3" file="Hand_LF1J3.STL" />
+		<mesh name="Hand_LF1J4" file="Hand_LF1J4.STL" />
+		<mesh name="Hand_LF2J1" file="Hand_LF2J1.STL" />
+		<mesh name="Hand_LF2J2" file="Hand_LF2J2.STL" />
+		<mesh name="Hand_LF2J3" file="Hand_LF2J3.STL" />
+		<mesh name="Hand_LF2J4" file="Hand_LF2J4.STL" />
+		<mesh name="Hand_LF3J1" file="Hand_LF3J1.STL" />
+		<mesh name="Hand_LF3J2" file="Hand_LF3J2.STL" />
+		<mesh name="Hand_LF3J3" file="Hand_LF3J3.STL" />
+		<mesh name="Hand_LF3J4" file="Hand_LF3J4.STL" />
+	</asset>
+
+	<worldbody>
+		<light directional="true" pos=" 5 -5 5" dir="-0.5  0.5 -1" diffuse="0.3 0.3 0.3" castshadow="false"/>
+		<light directional="true" pos=" 5  5 5" dir="-0.5 -0.5 -1" diffuse="0.3 0.3 0.3" castshadow="false"/>
+		<light directional="true" pos="-5  5 5" dir=" 0.5 -0.5 -1" diffuse="0.3 0.3 0.3" castshadow="false"/>
+		<light directional="true" pos="-5 -5 5" dir=" 0.5  0.5 -1" diffuse="0.3 0.3 0.3" castshadow="false"/>
+		
+		<geom name="Floor" type="plane" pos="0 0 0" size="0 0 10" material="MatPlane" solref="0.005 0.2" solimp="0.95 0.98 0.01 0.5 2"/>
+
+		<body name="RArmJ6_Link" pos="0 0 0.05" quat="0 0.7071068 0 0.7071068">
+			<joint name="J6" pos="0 0 0" axis="0 0 1" limited="true" range="-0.5 0.5" springdamper="0.01 1"/>
+			<inertial pos="0.0894019 0.000764982 0.00970289" quat="0.129674 0.669786 -0.155093 0.714505"
+								mass="0.317233" diaginertia="0.000124903 0.000112453 0.000100303"/>
+			<geom type="mesh" rgba="1 0.15625 0 1" mesh="RArmJ6_Link"/>
+
+			<!-- Right Thumb -->
+			<body name="Hand_RT1" pos="0.125469 -0.010945 -0.006325" quat="0.706434 0.0308436 0.706434 -0.0308436">
+				<joint name="RT1" pos="0 0 0" axis="0 0 -1" limited="true" range="0 1.8"/>
+				<inertial pos="-5.49453e-05 -0.0141589 -0.0074296" quat="0.998952 -0.045631 0.000506768 -0.00355944"
+									mass="0.0206488" diaginertia="1.87142e-06 1.36365e-06 9.66694e-07"/>
+				<geom type="mesh" rgba="0.32421875 0.3359375 0.3515625 1" mesh="Hand_RT1"/>
+
+				<body name="Hand_RT2" pos="-5e-05 -0.0441 0" quat="0.707107 -0.707107 0 0">
+					<joint name="RT2" pos="0 0 0" axis="0 0 -1" limited="true" range="-1.57 1.57"/>
+					<inertial pos="-2.98452e-12 0.000573264 0.00797915" quat="0.702887 0.711302 0 0"
+										mass="0.00152599" diaginertia="6.01888e-08 5.38721e-08 3.40722e-08"/>
+					<geom type="mesh" rgba="0 0.6 1 1" mesh="Hand_RT2"/>
+
+					<body name="Hand_RT3" pos="0 0 0" quat="0.5 -0.5 0.5 0.5">
+						<joint name="RT3" pos="0 0 0" axis="0 0 1" limited="true" range="0 1.8"/>
+						<inertial pos="0.02005 0.000469812 -0.0005" quat="0.473244 0.525395 0.525395 0.473244"
+											mass="0.0341379" diaginertia="3.07195e-06 2.04238e-06 1.54556e-06"/>
+						<geom type="mesh" rgba="0.32421875 0.3359375 0.3515625 1" mesh="Hand_RT3"/>
+
+						<body name="Hand_RT4" pos="0.0401 0 -0.000675">
+							<joint name="RT4" pos="0 0 0" axis="0 0 -1" limited="true" range="-1.8 0"/>
+							<inertial pos="0.0191982 6.45169e-05 -0.000413501" quat="0.778805 -0.000659988 -0.000727599 0.627266"
+												mass="0.0098292" diaginertia="6.11343e-07 4.92403e-07 3.88556e-07"/>
+							<geom name="rHand_tip1" type="mesh" rgba="0.828125 0.68359375 0.21484375 1" mesh="Hand_RT4"/>
+							<site name="RT_EE" pos="0.020748 0 0" size="0.002" type="sphere" rgba="0 0 1 1"/>
+						</body>
+					</body>
+				</body>
+			</body>
+
+			<!-- Right Index Finger -->
+			<body name="Hand_RF1J1" pos="0.1959 -0.033168 0.006325" quat="0.706434 0.0308436 0.706434 -0.0308436">
+				<joint name="RF1J1" pos="0 0 0" axis="0 0 -1" limited="true" range="-1.57 1.57"/>
+				<inertial pos="-2.49922e-12 -0.000573264 -0.00797915" quat="0.702887 0.711302 0 0" 
+									mass="0.00152599" diaginertia="6.01888e-08 5.38721e-08 3.40722e-08"/>
+				<geom type="mesh" rgba="0.32421875 0.3359375 0.3515625 1" mesh="Hand_RF1J1"/>
+
+				<body name="Hand_RF1J2" pos="0 0.0005 0" quat="0.5 0.5 -0.5 0.5">
+					<joint name="RF1J2" pos="0 0 0" axis="0 0 1" limited="true" range="0 1.8"/>
+					<inertial pos="0.02005 0.000469812 0" quat="0.473244 0.525395 0.525395 0.473244" 
+										mass="0.0341379" diaginertia="3.07195e-06 2.04238e-06 1.54556e-06"/>
+					<geom type="mesh" rgba="0 0.6 1 1" mesh="Hand_RF1J2"/>
+
+					<body name="Hand_RF1J3" pos="0.0401 0 -0.000125">
+						<joint name="RF1J3" pos="0 0 0" axis="0 0 -1" limited="true" range="-1.8 0"/>
+						<inertial pos="0.0213453 0.000452463 -0.000262751" quat="0.47733 0.521686 0.521686 0.47733"
+											mass="0.0177234" diaginertia="1.57868e-06 1.06889e-06 7.79807e-07"/>
+						<geom type="mesh" rgba="0.32421875 0.3359375 0.3515625 1" mesh="Hand_RF1J3"/>
+
+						<body name="Hand_RF1J4" pos="0.03005 0 -5e-05">
+							<joint name="RF1J4" pos="0 0 0" axis="0 0 -1" limited="true" range="-1.8 0"/>
+							<inertial pos="0.0191982 6.45169e-05 -0.000413501" quat="0.778805 -0.000659988 -0.000727599 0.627266"
+												mass="0.0098292" diaginertia="6.11343e-07 4.92403e-07 3.88556e-07"/>
+							<geom name="rHand_tip2" type="mesh" rgba="0.828125 0.68359375 0.21484375 1" mesh="Hand_RF1J4"/>
+							<site name="RF1_EE" pos="0.020748 0 0"  size="0.002" type="sphere" rgba="0 0 1 1"/>
+						</body>
+					</body>
+				</body>
+			</body>
+				
+			<!-- Right Middle Finger -->
+			<body name="Hand_RF2J1" pos="0.197348 0 0.006325" quat="0.707107 0 0.707107 0">
+				<joint name="RF2J1" pos="0 0 0" axis="0 0 -1" limited="true" range="-1.57 1.57"/>
+				<inertial pos="-2.49577e-12 -0.000573266 -0.00797915" quat="0.702887 0.711302 0 0"
+									mass="0.00152599" diaginertia="6.01889e-08 5.38721e-08 3.40722e-08"/>
+				<geom type="mesh" rgba="0.32421875 0.3359375 0.3515625 1" mesh="Hand_RF2J1"/>
+
+				<body name="Hand_RF2J2" pos="0 0.0005 0" quat="0.5 0.5 -0.5 0.5">
+					<joint name="RF2J2" pos="0 0 0" axis="0 0 1" limited="true" range="0 1.8"/>
+					<inertial pos="0.02005 0.000469812 0" quat="0.473244 0.525395 0.525395 0.473244"
+										mass="0.0341379" diaginertia="3.07195e-06 2.04238e-06 1.54556e-06"/>
+					<geom type="mesh" rgba="0 0.6 1 1" mesh="Hand_RF2J2"/>
+
+					<body name="Hand_RF2J3" pos="0.0401 0 -0.000125">
+						<joint name="RF2J3" pos="0 0 0" axis="0 0 -1" limited="true" range="-1.8 0"/>
+						<inertial pos="0.0213453 0.000452463 -0.000262751" quat="0.47733 0.521686 0.521686 0.47733"
+											mass="0.0177234" diaginertia="1.57868e-06 1.06889e-06 7.79807e-07"/>
+						<geom type="mesh" rgba="0.32421875 0.3359375 0.3515625 1" mesh="Hand_RF2J3"/>
+
+						<body name="Hand_RF2J4" pos="0.03005 0 -5e-05">
+							<joint name="RF2J4" pos="0 0 0" axis="0 0 -1" limited="true" range="-1.8 0"/>
+							<inertial pos="0.0191982 6.45145e-05 -0.000413505" quat="0.778809 -0.000661237 -0.000728567 0.62726"
+												mass="0.0098292" diaginertia="6.11342e-07 4.92404e-07 3.88555e-07"/>
+							<geom name="rHand_tip3" type="mesh" rgba="0.828125 0.68359375 0.21484375 1" mesh="Hand_RF2J4"/>
+							<site name="RF2_EE" pos="0.020748 0 0" size="0.002" type="sphere" rgba="0 0 1 1"/>
+						</body>
+					</body>
+				</body>
+			</body>
+
+			<!-- Right Ring Finger -->
+			<body name="Hand_RF3J1" pos="0.1959 0.033168 0.006325" quat="0.0308436 0.706434 0.0308436 -0.706434">
+				<joint name="RF3J1" pos="0 0 0" axis="0 0 1" limited="true" range="-1.57 1.57"/>
+				<inertial pos="0 0.000573267 0.00797915" quat="0.702887 0.711302 0 0" 
+									mass="0.00152599" diaginertia="6.01888e-08 5.38721e-08 3.40722e-08"/>
+				<geom type="mesh" rgba="0.32421875 0.3359375 0.3515625 1" mesh="Hand_RF3J1"/>
+
+				<body name="Hand_RF3J2" pos="0 -0.0005 0" quat="0.5 0.5 0.5 -0.5">
+					<joint name="RF3J2" pos="0 0 0" axis="0 0 -1" limited="true" range="0 1.8"/>
+					<inertial pos="0.02005 -0.000469812 0" quat="0.525395 0.473244 0.473244 0.525395"
+										mass="0.0341379" diaginertia="3.07195e-06 2.04238e-06 1.54556e-06"/>
+					<geom type="mesh" rgba="0 0.6 1 1" mesh="Hand_RF3J2"/>
+
+					<body name="Hand_RF3J3" pos="0.0401 0 0.000125">
+						<joint name="RF3J3" pos="0 0 0" axis="0 0 1" limited="true" range="-1.8 0"/>
+						<inertial pos="0.0213453 -0.000452463 0.000262751" quat="0.521686 0.47733 0.47733 0.521686"
+											mass="0.0177234" diaginertia="1.57868e-06 1.06889e-06 7.79807e-07"/>
+						<geom type="mesh" rgba="0.32421875 0.3359375 0.3515625 1" mesh="Hand_RF3J3"/>
+
+						<body name="Hand_RF3 J4" pos="0.03005 0 5e-05">
+							<joint name="RF3J4" pos="0 0 0" axis="0 0 1" limited="true" range="-1.8 0"/>
+							<inertial pos="0.0191982 -6.4521e-05 0.000413504" quat="0.627261 0.000727904 0.000661492 0.778808"
+												mass="0.00982919" diaginertia="6.11342e-07 4.92404e-07 3.88555e-07" />
+							<geom name="rHand_tip4" type="mesh" rgba="0.828125 0.68359375 0.21484375 1" mesh="Hand_RF3J4"/>
+							<site name="RF3_EE" pos="0.020748 0 0" size="0.002" type="sphere" rgba="0 0 1 1"/>
+						</body>
+					</body>
+				</body>
+			</body>
+
+		</body>
+	</worldbody>
+
+
+	<actuator>
+		<general name="J_6" joint="J6" gear="1" ctrllimited="false" ctrlrange="-250 250" />
+		<general name="RT_1" joint="RT1" gear="1" ctrllimited="false" ctrlrange="-100 100" />
+		<general name="RT_2" joint="RT2" gear="1" ctrllimited="false" ctrlrange="-100 100" />
+		<general name="RT_3" joint="RT3" gear="1" ctrllimited="false" ctrlrange="-100 100" />
+		<general name="RT_4" joint="RT4" gear="1" ctrllimited="false" ctrlrange="-100 100" />
+		<general name="RF1J_1" joint="RF1J1" gear="1" ctrllimited="false" ctrlrange="-100 100" />
+		<general name="RF1J_2" joint="RF1J2" gear="1" ctrllimited="false" ctrlrange="-100 100" />
+		<general name="RF1J_3" joint="RF1J3" gear="1" ctrllimited="false" ctrlrange="-100 100" />
+		<general name="RF1J_4" joint="RF1J4" gear="1" ctrllimited="false" ctrlrange="-100 100" />
+		<general name="RF2J_1" joint="RF2J1" gear="1" ctrllimited="false" ctrlrange="-100 100" />
+		<general name="RF2J_2" joint="RF2J2" gear="1" ctrllimited="false" ctrlrange="-100 100" />
+		<general name="RF2J_3" joint="RF2J3" gear="1" ctrllimited="false" ctrlrange="-100 100" />
+		<general name="RF2J_4" joint="RF2J4" gear="1" ctrllimited="false" ctrlrange="-100 100" />
+		<general name="RF3J_1" joint="RF3J1" gear="1" ctrllimited="false" ctrlrange="-100 100" />
+		<general name="RF3J_2" joint="RF3J2" gear="1" ctrllimited="false" ctrlrange="-100 100" />
+		<general name="RF3J_3" joint="RF3J3" gear="1" ctrllimited="false" ctrlrange="-100 100" />
+		<general name="RF3J_4" joint="RF3J4" gear="1" ctrllimited="false" ctrlrange="-100 100" />
+	</actuator>
+
+</mujoco>

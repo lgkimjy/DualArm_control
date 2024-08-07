@@ -1,0 +1,81 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:macro name="yori_gazebo" params="ns position_mode:=^|true effort_mode:=^|false trajectory_mode:=^|false">
+    
+    <ros2_control name="GazeboSystem" type="system">
+      <hardware>
+        <plugin>gazebo_ros2_control/GazeboSystem</plugin>
+      </hardware>
+
+      <xacro:macro name="configure_joint_position" params="joint_name limit_min limit_max">
+        <joint name="${joint_name}">
+          <command_interface name="position">
+            <param name="min">${limit_min}</param>
+            <param name="max">${limit_max}</param>
+          </command_interface>
+          <state_interface name="position"/>
+          <state_interface name="velocity"/>
+          <state_interface name="effort"/>
+        </joint>
+      </xacro:macro>  
+      
+      <xacro:macro name="configure_joint_effort" params="joint_name limit_min limit_max">
+        <joint name="${joint_name}">
+          <command_interface name="effort">
+            <param name="min">${limit_min}</param>
+            <param name="max">${limit_max}</param>
+          </command_interface>
+          <state_interface name="position"/>
+          <state_interface name="velocity"/>
+          <state_interface name="effort"/>
+        </joint>
+      </xacro:macro> 
+
+      <xacro:if value="${position_mode}">
+        <xacro:configure_joint_position joint_name="${ns}_joint_body" limit_min="-3.14159" limit_max="3.14159"/>
+        <xacro:configure_joint_position joint_name="${ns}_joint_l1" limit_min="-2.2689" limit_max="2.2689"/>
+        <xacro:configure_joint_position joint_name="${ns}_joint_l2" limit_min="-3.14159" limit_max="3.14159"/>
+        <xacro:configure_joint_position joint_name="${ns}_joint_l3" limit_min="-0.9599" limit_max="3.14159"/>
+        <xacro:configure_joint_position joint_name="${ns}_joint_l4" limit_min="-2.4435" limit_max="2.4435"/>
+        <xacro:configure_joint_position joint_name="${ns}_joint_l5" limit_min="-3.14159" limit_max="3.14159"/>
+        <xacro:configure_joint_position joint_name="${ns}_joint_r1" limit_min="-2.2689" limit_max="2.2689"/>
+        <xacro:configure_joint_position joint_name="${ns}_joint_r2" limit_min="-3.14159" limit_max="3.14159"/>
+        <xacro:configure_joint_position joint_name="${ns}_joint_r3" limit_min="-0.9599" limit_max="3.14159"/>
+        <xacro:configure_joint_position joint_name="${ns}_joint_r4" limit_min="-2.4435" limit_max="2.4435"/>
+        <xacro:configure_joint_position joint_name="${ns}_joint_r5" limit_min="-3.14159" limit_max="3.14159"/>
+      </xacro:if>
+
+      <xacro:if value="${effort_mode}">
+        <xacro:configure_joint_effort joint_name="${ns}_joint_body" limit_min="-30.0" limit_max="30.0"/>
+        <xacro:configure_joint_effort joint_name="${ns}_joint_l1" limit_min="-30.0" limit_max="30.0"/>
+        <xacro:configure_joint_effort joint_name="${ns}_joint_l2" limit_min="-30.0" limit_max="30.0"/>
+        <xacro:configure_joint_effort joint_name="${ns}_joint_l3" limit_min="-30.0" limit_max="30.0"/>
+        <xacro:configure_joint_effort joint_name="${ns}_joint_l4" limit_min="-20.0" limit_max="20.0"/>
+        <xacro:configure_joint_effort joint_name="${ns}_joint_l5" limit_min="-20.0" limit_max="20.0"/>
+        <xacro:configure_joint_effort joint_name="${ns}_joint_r1" limit_min="-30.0" limit_max="30.0"/>
+        <xacro:configure_joint_effort joint_name="${ns}_joint_r2" limit_min="-30.0" limit_max="30.0"/>
+        <xacro:configure_joint_effort joint_name="${ns}_joint_r3" limit_min="-30.0" limit_max="30.0"/>
+        <xacro:configure_joint_effort joint_name="${ns}_joint_r4" limit_min="-20.0" limit_max="20.0"/>
+        <xacro:configure_joint_effort joint_name="${ns}_joint_r5" limit_min="-20.0" limit_max="20.0"/>
+      </xacro:if>
+
+      <xacro:if value="${trajectory_mode}">
+        <xacro:configure_joint_position joint_name="${ns}_joint_body" limit_min="-3.14159" limit_max="3.14159"/>
+        <xacro:configure_joint_position joint_name="${ns}_joint_l1" limit_min="-2.2689" limit_max="2.2689"/>
+        <xacro:configure_joint_position joint_name="${ns}_joint_l2" limit_min="-3.14159" limit_max="3.14159"/>
+        <xacro:configure_joint_position joint_name="${ns}_joint_l3" limit_min="-0.9599" limit_max="3.14159"/>
+        <xacro:configure_joint_position joint_name="${ns}_joint_l4" limit_min="-2.4435" limit_max="2.4435"/>
+        <xacro:configure_joint_position joint_name="${ns}_joint_l5" limit_min="-3.14159" limit_max="3.14159"/>
+        <xacro:configure_joint_position joint_name="${ns}_joint_r1" limit_min="-2.2689" limit_max="2.2689"/>
+        <xacro:configure_joint_position joint_name="${ns}_joint_r2" limit_min="-3.14159" limit_max="3.14159"/>
+        <xacro:configure_joint_position joint_name="${ns}_joint_r3" limit_min="-0.9599" limit_max="3.14159"/>
+        <xacro:configure_joint_position joint_name="${ns}_joint_r4" limit_min="-2.4435" limit_max="2.4435"/>
+        <xacro:configure_joint_position joint_name="${ns}_joint_r5" limit_min="-3.14159" limit_max="3.14159"/>
+      </xacro:if>
+
+    </ros2_control>
+
+  </xacro:macro>
+
+</robot>
