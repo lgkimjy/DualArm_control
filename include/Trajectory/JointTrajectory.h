@@ -146,8 +146,5 @@ inline void CP2P_Traj<DIM, T>::computeTraj(Eigen::Matrix<sysReal, DIM, 1>& q_d, 
 			break;
 		}
 	}
-	else {
-		is_moving_ = false;
-	}
 }
 

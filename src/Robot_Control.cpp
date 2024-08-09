@@ -296,6 +296,8 @@ void CRobotControl::computeControlInput()
 	}
 	else
 	{
+		qpos_d = robot.q;
+		qvel_d = robot.qdot;
 		NullSpacePlanner();
 #if defined(YORI)
 		computeJointTorque(TORQUE);
@@ -306,6 +308,9 @@ void CRobotControl::computeControlInput()
 #elif defined(DualArmHand)
 		computeJointTorque(TORQUE);
 #endif
+		qpos_d(0) = qpos_ref(0);
+		qvel_d(0) = 0.0;
+		joint_torq(0) = 20000 * (qpos_d(0) - robot.q(0)) + 2000 * (qvel_d(0) - robot.qdot(0));	
 	}
 }
 
