@@ -100,12 +100,19 @@ set(ARBML_SRC
   include/ARBMLlib/ARBML.cpp
   include/ARBMLlib/RigidBody.cpp
 )
-
+set(SIM_SRC
+  include/Simulator/Robot_Simulate.cpp
+)
+set(CONTRL_SRC
+  include/NullControl/NullControl.cpp
+)
 add_executable(template 
   src/main.cpp 
   src/Robot_Control.cpp 
   ${SIMULATE_RESOURCE_FILES} 
+  ${SIM_SRC}
   ${ARBML_SRC}
+  ${CONTRL_SRC}
 )
 target_include_directories(template PUBLIC
   ${CMAKE_SOURCE_DIR}/include

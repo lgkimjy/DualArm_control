@@ -146,6 +146,8 @@
 										<geom name="LWrR_Link" type="mesh" mesh="LWrR_Link" rgba="0.66667 0.63922 0.61961 1"/>
 										<geom type="mesh" mesh="LHandbase_Link" pos="-0.0177 -0.080748 0" quat="0.5 0.5 0.5 -0.5"
 													rgba="0 0.6 1 1"/>
+
+										<site name="LArm_EE" type="sphere" pos="-0.0177 -0.080748 0.0" size="0.005" rgba="1 0 0 1" group="3"/>
 										
 										<!-- Left Gripper -->
 										<body name="rh_p12_rn_r1" pos="-0.00970018 -0.128748 -2.9385e-08" quat="0.499998 0.5 0.5 -0.500002">
@@ -231,6 +233,8 @@
 										<geom name="RWrR_Link" type="mesh" mesh="RWrR_Link" rgba="0.66667 0.63922 0.61961 1"/>
 										<geom name="RHand_Palm" type="mesh" mesh="RHandbase_Link" pos="-0.0177 -0.080748 0" quat="0.5 -0.5 -0.5 -0.5" 
 													rgba="1 0.15625 0 1"/>
+										
+										<site name="RArm_EE" type="sphere" pos="-0.0177 -0.080748 0.0" size="0.005" rgba="1 0 0 1" group="3"/>
 										
 										<!-- Right Hand : Thumb -->
 										<body name="Hand_RT1" pos="-0.00675519 -0.125469 0.00632504" quat="0.521338 0.477708 0.52134 -0.477709">

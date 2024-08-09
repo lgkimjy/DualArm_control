@@ -17,6 +17,44 @@
 namespace {
 //---------------------------------------- plugin handling -----------------------------------------
 
+
+void push_back_and_manage(std::deque<mjtNum*>& traj, const mjtNum* source, int history, int array_size) 
+{
+    mjtNum* new_array = new mjtNum[array_size];
+    std::copy(source, source + array_size, new_array);
+
+    if (traj.size() < history) {
+        traj.push_back(new_array);
+    } else if (traj.size() == history) {
+        traj.push_back(new_array);
+        delete[] traj.front(); // Free memory of the oldest element
+        traj.pop_front();
+    }
+}
+
+void visualize_state_planner(mj::Simulate& sim)
+{
+  // std::cout << sim.cam.lookat[0] << std::endl;
+  // std::cout << sim.cam.lookat[1] << std::endl;
+  // std::cout << sim.cam.lookat[2] << std::endl;
+  // std::cout << "[sim.cam] azm :"<< sim.cam.azimuth << std::endl;
+  // std::cout << "[sim.cam] elv :"<< sim.cam.elevation << std::endl;
+  // std::cout << "[sim.cam] dist:"<< sim.cam.distance << std::endl;
+
+  for(int i = 0; i < 3; ++i)
+  {
+    sim.lEE[i] = robot_control.p_EE[0](i);
+    sim.rEE[i] = robot_control.p_EE[1](i);
+    sim.lEE_d[i] = robot_control.p_lEE_d(i);
+    sim.rEE_d[i] = robot_control.p_rEE_d(i);
+  }
+
+  push_back_and_manage(sim.lEE_traj, sim.lEE, sim.history, 3);
+  push_back_and_manage(sim.rEE_traj, sim.rEE, sim.history, 3);
+  push_back_and_manage(sim.lEE_d_traj, sim.lEE_d, sim.history, 3);
+  push_back_and_manage(sim.rEE_d_traj, sim.rEE_d, sim.history, 3);
+}
+
 // return the path to the directory containing the current executable
 // used to determine the location of auto-loaded plugin libraries
 std::string getExecutableDir() {
@@ -327,6 +365,7 @@ void PhysicsLoop(mj::Simulate& sim) {
 
             ////////////////// USER CODE : START //////////////////
 						robot_control.UserControl(m, d);
+            visualize_state_planner(sim);
 						/////////////////// USER CODE : END ///////////////////
 
             // run single step, let next iteration deal with timing
@@ -353,6 +392,7 @@ void PhysicsLoop(mj::Simulate& sim) {
 
               ////////////////// USER CODE : START //////////////////
 							robot_control.UserControl(m, d);
+              visualize_state_planner(sim);
 							/////////////////// USER CODE : END ///////////////////
 
               // call mj_step

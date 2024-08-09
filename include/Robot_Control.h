@@ -7,6 +7,8 @@
 
 #include "ARBMLlib/ARBML.h"
 #include "Trajectory/JointTrajectory.h"
+#include "NullControl/NullControl.hpp"
+#include "csvpp/Write.h"
 
 using namespace std;
 
@@ -18,8 +20,10 @@ constexpr sysReal INITIAL_POSE = 2.0;				//	Second
 constexpr int CONTROL_RATE = 1;
 
 typedef enum {
-	JOINT_PD = 0X01,
-	TORQUE	 = 0X02,
+	JOINT_PD 	= 0X01,
+	TORQUE	 	= 0X02,
+	CLIK_PD		= 0X03,
+	GRAV_COMP	= 0X04,
 }CtrlType;
 
 class CRobotControl
@@ -87,10 +91,27 @@ public:
 	CP2P_Traj<DOF3, double> 				RPos_Traj;
 	Eigen::Matrix<double, ACTIVE_DOF, 1> 	qpos_ref;
 
+	Eigen::Vector3d p_lEE_d, p_rEE_d;
+	Eigen::Vector3d pdot_lEE_d, pdot_rEE_d;
+	Eigen::Vector3d pddot_lEE_d, pddot_rEE_d;
+
+	Null::NullSpaceControl NullCtrl;
+
+    csvpp::Writer<double, double, double, double, double, double, double> lEE_d{
+        // destination file
+        CMAKE_SOURCE_DIR"/log/data/lEE_d.csv",
+        // headers
+        "dt",
+		"p_lEE_x","p_lEE_y","p_lEE_z",
+		"pdot_lEE_x","pdot_lEE_y","pdot_lEE_z"
+    };
+
 	void computeMotionTasks();
 	void JointPlanner(double duration);
 	void LeftEEPlanner(double duration, Eigen::Vector3d EE_pos);
 	void RightEEPlanner(double duration, Eigen::Vector3d EE_pos);
+	void assignSelectedJointTask(std::vector<int> selectedJoints);
+	void CLIK();
 	void NullSpacePlanner();
 	void computeJointTorque(CtrlType type);
 	////////////////////////////////////////////

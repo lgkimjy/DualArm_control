@@ -111,6 +111,13 @@ void CRobotControl::initEEParameters(const mjModel* model)
 		Jdotp_EE[i].setZero();
 		Jdotr_EE[i].setZero();
 	}
+
+	p_lEE_d.setZero();
+	p_rEE_d.setZero();
+	pdot_lEE_d.setZero();
+	pdot_rEE_d.setZero();
+	pddot_lEE_d.setZero();
+	pddot_rEE_d.setZero();
 }
 
 
@@ -289,16 +296,24 @@ void CRobotControl::computeControlInput()
 {
 	if(sim_time <= TORQUE_ON){
 		computeJointTorque(JOINT_PD);
+		p_lEE_d = p_EE[0];
+		p_rEE_d = p_EE[1];
 	}
 	else if(sim_time <= TORQUE_ON + INITIAL_POSE) {
 		JointPlanner(INITIAL_POSE);
-		computeJointTorque(TORQUE);
+		computeJointTorque(JOINT_PD);
+		p_lEE_d = p_EE[0];
+		p_rEE_d = p_EE[1];
 	}
 	else
-	{
-		qpos_d = robot.q;
-		qvel_d = robot.qdot;
-		NullSpacePlanner();
+	{		
+		LeftEEPlanner(3.0, p_EE[0] + Eigen::Vector3d(0.3, -0.05, 0.25));
+		RightEEPlanner(3.0, p_EE[1] + Eigen::Vector3d(0.3, 0.05, 0.25));
+
+		// lEE_d.add(sim_time, p_lEE_d(0), p_lEE_d(1), p_lEE_d(2), pdot_lEE_d(0), pdot_lEE_d(1), pdot_lEE_d(2));
+
+		// NullSpacePlanner();
+		CLIK();
 #if defined(YORI)
 		computeJointTorque(TORQUE);
 #elif defined(ArmHand)
@@ -306,11 +321,11 @@ void CRobotControl::computeControlInput()
 #elif defined(DualArm)
 		computeJointTorque(TORQUE);
 #elif defined(DualArmHand)
-		computeJointTorque(TORQUE);
+		// computeJointTorque(JOINT_PD);
+		// computeJointTorque(TORQUE);
+		// computeJointTorque(GRAV_COMP);
+		computeJointTorque(CLIK_PD);
 #endif
-		qpos_d(0) = qpos_ref(0);
-		qvel_d(0) = 0.0;
-		joint_torq(0) = 20000 * (qpos_d(0) - robot.q(0)) + 2000 * (qvel_d(0) - robot.qdot(0));	
 	}
 }
 
@@ -331,7 +346,7 @@ void CRobotControl::LeftEEPlanner(double duration, Eigen::Vector3d EE_pos)
 		std::cout << "[" << sim_time << "] At LeftEEPlanner" << std::endl;
 		LPos_Traj.setTargetPosition(p_EE[0], EE_pos, duration, 1 / 1000.0, CUBIC);
 	}
-	// LPos_Traj.computeTraj(qpos_d, qvel_d, qacc_d);
+	LPos_Traj.computeTraj(p_lEE_d, pdot_lEE_d, pddot_lEE_d);
 }
 
 void CRobotControl::RightEEPlanner(double duration, Eigen::Vector3d EE_pos)
@@ -341,12 +356,54 @@ void CRobotControl::RightEEPlanner(double duration, Eigen::Vector3d EE_pos)
 		std::cout << "[" << sim_time << "] At RightEEPlanner" << std::endl;
 		RPos_Traj.setTargetPosition(p_EE[1], EE_pos, duration, 1 / 1000.0, CUBIC);
 	}
-	// RPos_Traj.computeTraj(qpos_d, qvel_d, qacc_d);
+	RPos_Traj.computeTraj(p_rEE_d, pdot_rEE_d, pddot_rEE_d);
+}
+
+void CRobotControl::CLIK()
+{
+	Eigen::MatrixXd InvJ;
+
+	NullCtrl.svd_pseudoInverse(Jp_EE[0], InvJ);
+	// joint_torq = 100 * (Jp_EE[0].transpose() * (pddot_lEE_d + 20 * (pdot_lEE_d - pdot_EE[0]) + 1 * (p_lEE_d - p_EE[0])) - Jr_EE[0].transpose() * omega_EE[0]);
+	joint_torq = 100 * (InvJ * (pdot_lEE_d + 50 * (p_lEE_d - p_EE[0])) - robot.qdot);// + 1 * (p_lEE_d - p_EE[0]);
+	NullCtrl.svd_pseudoInverse(Jp_EE[1], InvJ);
+	joint_torq += 100 * (InvJ * (pdot_rEE_d + 50 * (p_rEE_d - p_EE[1])) - robot.qdot);// + 1 * (p_lEE_d - p_EE[0]);
+	joint_torq(0) = 20000 * (qpos_d(0) - robot.q(0)) + 2000 * (qvel_d(0) - robot.qdot(0));	
 }
 
 void CRobotControl::NullSpacePlanner()
 {
+	// NullCtrl.clearTask();
 
+	// //// Task 0 : Set Contact Jacobian w/ 4 point contact & no swing trajectory
+	// // NullCtrl.setContactJacobianSize(1);
+	// // NullCtrl.J_c.block(0, 0, 3, TOTAL_DOF) = Jp_EE[1];	// right toe
+	// // NullCtrl.Jdot_c.block(0, 0, 3, TOTAL_DOF) = Jdotp_EE[1];
+
+	// // assignSelectedJointTask({0});
+	Eigen::Vector3d X_ee_cmd = pddot_lEE_d + 20 * (pdot_lEE_d - pdot_EE[0]) + 1 * (p_lEE_d - p_EE[0]);
+	// NullCtrl.assignTask(3, Jp_EE[0], Jdotp_EE[0], p_EE[0], p_lEE_d, pdot_lEE_d, X_ee_cmd);
+	// // NullCtrl.assignTask(3, Jp_EE[1], Jdotp_EE[1], p_EE[1], p_rEE_d, pdot_rEE_d, pddot_rEE_d);
+
+	// NullCtrl.computeNullSpaceControl(robot.xidot);
+	// qpos_d = NullCtrl.qpos_d;
+	// qvel_d = NullCtrl.qvel_d;
+	// qacc_d = NullCtrl.qacc_d;
+	// std::cout << "[" << sim_time << "] qpos_d : " << qpos_d.transpose() << std::endl;
+	// std::cout << "[" << sim_time << "] qvel_d : " << qvel_d.transpose() << std::endl;
+	// std::cout << "[" << sim_time << "] qacc_d : " << qacc_d.transpose() << std::endl << std::endl;
+	Eigen::Matrix<double, TOTAL_DOF, TOTAL_DOF> N;
+	Eigen::MatrixXd Inv_J1;
+	Eigen::MatrixXd Inv_J2;
+	NullCtrl.svd_pseudoInverse(Jp_EE[0], Inv_J1);
+	NullCtrl.BuildProjectionMatrix(Jp_EE[0], N);
+	NullCtrl.svd_pseudoInverse(Jp_EE[1] * N, Inv_J2);
+	
+	qvel_d = Inv_J1 * pdot_lEE_d + Inv_J2 * (pdot_rEE_d - Jp_EE[1] * Inv_J1 * pdot_lEE_d);
+	// qpos_d = qpos_d + qvel_d * robot.getSamplingTime();
+	// qacc_d = qvel_d / robot.getSamplingTime();
+
+	qacc_d = Inv_J2 * (X_ee_cmd - Jdotp_EE[1] * robot.xidot);
 }
 
 void CRobotControl::computeJointTorque(CtrlType type)
@@ -356,7 +413,24 @@ void CRobotControl::computeJointTorque(CtrlType type)
 		joint_torq = K_qp * (qpos_d - robot.q) + K_qv * (qvel_d - robot.qdot);
 	} else if(type == TORQUE) {
 		// joint_torq = qacc_d + K_qp * (qpos_d - robot.q) + K_qv * (qvel_d - robot.qdot);
-		joint_torq = robot.M_mat * (500 * (qpos_d - robot.q) + 20 * (qvel_d - robot.qdot)) + robot.C_mat * robot.qdot + robot.g_vec;
+		// joint_torq = robot.M_mat * (qacc_d + 500 * (qpos_d - robot.q) + 10 * (qvel_d - robot.qdot)) + robot.C_mat * robot.qdot + robot.g_vec;
+		// joint_torq = robot.M_mat * (qacc_d + 500 * (qpos_d - robot.q) + 10 * (qvel_d - robot.qdot)) + robot.C_mat * robot.qdot + robot.g_vec;
+		// joint_torq = robot.M_mat * (10 * (qvel_d - robot.qdot)) + robot.C_mat * robot.qdot + robot.g_vec;
+		joint_torq = robot.M_mat * qacc_d + robot.C_mat * robot.qdot + robot.g_vec;
+	} 
+	else if(type == GRAV_COMP) 
+	{
+		qpos_d = robot.q;
+		qvel_d = robot.qdot;
+		// joint_torq = robot.M_mat * (500 * (qpos_d - robot.q) + 20 * (qvel_d - robot.qdot)) + robot.C_mat * robot.qdot + robot.g_vec;
+		
+		qpos_d(0) = qpos_ref(0);
+		qvel_d(0) = 0.0;
+		joint_torq(0) = 20000 * (qpos_d(0) - robot.q(0)) + 2000 * (qvel_d(0) - robot.qdot(0));	
+	}
+	else if(type == CLIK_PD)
+	{
+		joint_torq = joint_torq;
 	}
 }
 

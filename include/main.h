@@ -28,7 +28,8 @@
 
 #include <mujoco/mujoco.h>
 #include "glfw_adapter.h"
-#include "simulate.h"
+#include "Simulator/Robot_Simulate.hpp"
+// #include "simulate.h"
 #include "array_safety.h"
 
 #define MUJOCO_PLUGIN_DIR "mujoco_plugin"
