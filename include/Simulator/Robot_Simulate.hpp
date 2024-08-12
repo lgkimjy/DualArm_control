@@ -324,6 +324,7 @@ class Simulate {
   ///////////////////////////////
   /////////// JY Code ///////////
   int history = 1000;
+  int mode;
   mjtNum lEE_d[3];
   mjtNum rEE_d[3];
   std::deque<mjtNum*> lEE_d_traj;

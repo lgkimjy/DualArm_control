@@ -22,7 +22,7 @@ endif()
 #################################
 # Open Libraries ADD here
 #################################
-option(MUJOCO_BUILD_EXAMPLES "Build samples for MuJoCo" ON)
+option(MUJOCO_BUILD_EXAMPLES "Build samples for MuJoCo" OFF)
 option(MUJOCO_BUILD_SIMULATE "Build simulate library for MuJoCo" ON)
 option(MUJOCO_BUILD_TESTS "Build tests for MuJoCo" OFF)
 option(MUJOCO_TEST_PYTHON_UTIL "Build and test utility libraries for Python bindings" ON)

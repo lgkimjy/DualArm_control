@@ -39,3 +39,5 @@ libraries/
 
 # Files
 .DS_Store
+
+ignore/

@@ -5,8 +5,11 @@
 
 #include <yaml-cpp/yaml.h>
 
+#include "Simulator/Robot_Simulate.hpp"
+
 #include "ARBMLlib/ARBML.h"
 #include "Trajectory/JointTrajectory.h"
+#include "SplineLibs/CubicSpline.h"
 #include "NullControl/NullControl.hpp"
 #include "csvpp/Write.h"
 
@@ -20,9 +23,16 @@ constexpr sysReal INITIAL_POSE = 2.0;				//	Second
 constexpr int CONTROL_RATE = 1;
 
 typedef enum {
+	TORQ_OFF	= 0X01,
+	TORQ_ON 	= 0X02,
+	READY		= 0X03,
+	CLIK		= 0X04,
+}TaskCmdType;
+
+typedef enum {
 	JOINT_PD 	= 0X01,
-	TORQUE	 	= 0X02,
-	CLIK_PD		= 0X03,
+	INV_DYN	 	= 0X02,
+	TORQUE		= 0X03,
 	GRAV_COMP	= 0X04,
 }CtrlType;
 
@@ -45,7 +55,6 @@ public:
 	//////////	Active joint variables	//////////
 	Eigen::Matrix<double, ACTIVE_DOF, 1>			joint_torq;					//	Active joint torque
 	Eigen::Matrix<double, ACTIVE_DOF, 1>			qpos_d, qvel_d, qacc_d;		//	Desired position & velocity of active joint
-
 
 	///////////////////////////////////////////////////////////////////////////
 	/////	Motion parameters for body frame : NOT NECESSARY !!!!
@@ -83,19 +92,43 @@ public:
 	////////////////	JY CODE	////////////////
 	////////////////////////////////////////////
 	double sim_time;
+	TaskCmdType TaskCmd, PrevTaskCmd;
 	Eigen::Matrix<double, ACTIVE_DOF, ACTIVE_DOF> 	K_qp, K_qv;		//	Joint gain matrices for active joint
 	
 	// Polynomial Trajectory
 	CP2P_Traj<ACTIVE_DOF, double> 			Joint_Traj;
-	CP2P_Traj<DOF3, double> 				LPos_Traj;
-	CP2P_Traj<DOF3, double> 				RPos_Traj;
 	Eigen::Matrix<double, ACTIVE_DOF, 1> 	qpos_ref;
+
+	CP2P_Traj<DOF3, double> 				lEE_Traj;
+	CP2P_Traj<DOF3, double> 				rEE_Traj;
+	CP2P_Traj<DOF3, double> 				lEE_OriTraj;
+	CP2P_Traj<DOF3, double> 				rEE_OriTraj;
+	SPLINE::CCubicSpline					lEE_CubicSpline_Traj;
+	SPLINE::CCubicSpline					rEE_CubicSpline_Traj;
+	double 									lEE_local_t = 0.0;
+	double 									rEE_local_t = 0.0;
+
+	// remap p_EE -> p_XEE
+	Eigen::Vector3d p_lEE, p_rEE;
+	Eigen::Vector3d pdot_lEE, pdot_rEE;
+	Eigen::Matrix<double, DOF3, TOTAL_DOF> Jp_lEE, Jr_lEE, Jdotp_lEE, Jdotr_lEE;
+	Eigen::Matrix<double, DOF3, TOTAL_DOF> Jp_rEE, Jr_rEE, Jdotp_rEE, Jdotr_rEE;
 
 	Eigen::Vector3d p_lEE_d, p_rEE_d;
 	Eigen::Vector3d pdot_lEE_d, pdot_rEE_d;
 	Eigen::Vector3d pddot_lEE_d, pddot_rEE_d;
 
-	Null::NullSpaceControl NullCtrl;
+	// cmd variables
+	Eigen::Matrix<double, TOTAL_DOF, 1> 	qddot_cmd;
+	Eigen::Matrix<double, TOTAL_DOF, 1> 	torq_cmd;
+
+	// Nullspace Control related
+	Null::NullSpaceControl 					NullCtrl;
+	Eigen::Matrix<double, ACTIVE_DOF, 1>	pre_qvel_d;		//	Desired position & velocity of active joint
+
+	// CLIK related variables
+	bool initial_clik_flag = false;
+	Eigen::Matrix<double, TOTAL_DOF, 1> qpos_init;
 
     csvpp::Writer<double, double, double, double, double, double, double> lEE_d{
         // destination file
@@ -106,13 +139,18 @@ public:
 		"pdot_lEE_x","pdot_lEE_y","pdot_lEE_z"
     };
 
+	void getUserCommand(mujoco::Simulate& sim);
 	void computeMotionTasks();
+	void mapEEvar();
 	void JointPlanner(double duration);
-	void LeftEEPlanner(double duration, Eigen::Vector3d EE_pos);
-	void RightEEPlanner(double duration, Eigen::Vector3d EE_pos);
+	void LeftEEPlanner(double duration);
+	void RightEEPlanner(double duration);
 	void assignSelectedJointTask(std::vector<int> selectedJoints);
 	void CLIK();
+	void CTC(); // computed torque control
+	void RAC();	// resolved acceleration control
 	void NullSpacePlanner();
+	void OptimalControl();
 	void computeJointTorque(CtrlType type);
 	////////////////////////////////////////////
 	////////////////	JY CODE	////////////////

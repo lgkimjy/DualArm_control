@@ -364,6 +364,7 @@ void PhysicsLoop(mj::Simulate& sim) {
             sim.speed_changed = false;
 
             ////////////////// USER CODE : START //////////////////
+            robot_control.getUserCommand(sim);
 						robot_control.UserControl(m, d);
             visualize_state_planner(sim);
 						/////////////////// USER CODE : END ///////////////////
@@ -391,6 +392,7 @@ void PhysicsLoop(mj::Simulate& sim) {
               }
 
               ////////////////// USER CODE : START //////////////////
+              robot_control.getUserCommand(sim);
 							robot_control.UserControl(m, d);
               visualize_state_planner(sim);
 							/////////////////// USER CODE : END ///////////////////

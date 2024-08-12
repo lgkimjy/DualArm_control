@@ -113,6 +113,7 @@ enum {
   // right ui
   SECT_JOINT = 0,
   SECT_CONTROL,
+  SECT_CMD,
   NSECT1
 };
 
@@ -1105,6 +1106,32 @@ void MakeControlSection(mj::Simulate* sim, int oldstate) {
   }
 }
 
+/////////////////////////////////////////////////////////////////////
+////////////////////////////// JY CODE ////////////////////////////// 
+void MakeCommandSection(mj::Simulate* sim) {
+  mjuiDef defControl[] = {
+    {mjITEM_SECTION, "Command", 0, nullptr, "AC"},
+    {mjITEM_END}
+  };
+
+  // add section
+  mjui_add(&sim->ui1, defControl);
+
+  // create tree slider
+  mjuiDef defTree[] = {
+      {mjITEM_SEPARATOR, "Mode Selection", 1},
+      {mjITEM_BUTTON,    "Torq Off", 1, nullptr, ""},
+      {mjITEM_BUTTON,    "Torq On", 1, nullptr, ""},
+      {mjITEM_BUTTON,    "Ready", 1, nullptr, ""},
+      {mjITEM_BUTTON,    "CLIK", 1, nullptr, ""},
+      // {mjITEM_SLIDERNUM, "des_angvel_z", 2, &sim->des_vel[2], "-0.3 0.3"},
+      {mjITEM_END}
+  };
+  mjui_add(&sim->ui1, defTree);
+}
+////////////////////////////// JY CODE ////////////////////////////// 
+/////////////////////////////////////////////////////////////////////
+
 // make model-dependent UI sections
 void MakeUiSections(mj::Simulate* sim, const mjModel* m, const mjData* d) {
   // get section open-close state, UI 0
@@ -1136,6 +1163,11 @@ void MakeUiSections(mj::Simulate* sim, const mjModel* m, const mjData* d) {
   MakeGroupSection(sim, oldstate0[SECT_GROUP]);
   MakeJointSection(sim, oldstate1[SECT_JOINT]);
   MakeControlSection(sim, oldstate1[SECT_CONTROL]);
+  /////////////////////////////////////////////////////////////////////
+  ////////////////////////////// JY CODE //////////////////////////////
+  MakeCommandSection(sim);
+  ////////////////////////////// JY CODE ////////////////////////////// 
+  /////////////////////////////////////////////////////////////////////
 }
 
 //---------------------------------- utility functions ---------------------------------------------
@@ -1556,6 +1588,27 @@ void UiEvent(mjuiState* state) {
         sim->pending_.zero_ctrl = true;
       }
     }
+
+    /////////////////////////////////////////////////////////////////////
+    ////////////////////////////// JY CODE //////////////////////////////
+    // Command section
+    if (it && it->sectionid==SECT_CMD) {
+      if (it->itemid==1) {
+        sim->mode = 1;
+      } else if (it->itemid==2) {
+        sim->mode = 2;
+      } else if (it->itemid==3) {
+        sim->mode = 3;
+      } else if (it->itemid==4) {
+        sim->mode = 4;
+      } else if (it->itemid==5) {
+        sim->mode = 5;
+      } else if (it->itemid==6) {
+        sim->mode = 6;
+      }
+    }
+    ////////////////////////////// JY CODE //////////////////////////////
+    /////////////////////////////////////////////////////////////////////
 
     // stop if UI processed event
     if (it!=nullptr || (state->type==mjEVENT_KEY && state->key==0)) {
