@@ -28,10 +28,10 @@ option(MUJOCO_BUILD_TESTS "Build tests for MuJoCo" OFF)
 option(MUJOCO_TEST_PYTHON_UTIL "Build and test utility libraries for Python bindings" ON)
 add_subdirectory(${PROJECT_SOURCE_DIR}/libraries/mujoco)                             # Add subdirectory
 add_subdirectory(${PROJECT_SOURCE_DIR}/libraries/yaml-cpp)
-# option(BUILD_SHARED_LIBS "If ON, build shared library instead of static" OFF)
-# option(QPOASES_BUILD_EXAMPLES "Build examples." OFF)
-# option(QPOASES_AVOID_LA_NAMING_CONFLICTS "If ON, avoid to re-defined symbols that conflict with Blas/Lapack provided functions." OFF)
-# add_subdirectory(${PROJECT_SOURCE_DIR}/libraries/qpoases)
+option(BUILD_SHARED_LIBS "If ON, build shared library instead of static" OFF)
+option(QPOASES_BUILD_EXAMPLES "Build examples." OFF)
+option(QPOASES_AVOID_LA_NAMING_CONFLICTS "If ON, avoid to re-defined symbols that conflict with Blas/Lapack provided functions." OFF)
+add_subdirectory(${PROJECT_SOURCE_DIR}/libraries/qpOASES)
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/libraries/mujoco/sample/cmake") # CMake Path append
 add_definitions(-DCMAKE_SOURCE_DIR="${CMAKE_SOURCE_DIR}")
 #################################
@@ -92,6 +92,7 @@ include_directories(
     include
     INCLUDE_DIRS include
     LIBRARIES ${PROJECT_NAME}
+    ${PROJECT_SOURCE_DIR}/libraries/qpoases/include
     ${EIGEN3_INCLUDE_DIR}
     DEPENDS system_lib
 )
@@ -125,6 +126,7 @@ target_link_libraries(template
   lodepng
   csvpp
   yaml-cpp
+  qpOASES
 )
 target_compile_options(template PUBLIC ${MUJOCO_SIMULATE_COMPILE_OPTIONS})
 #################################

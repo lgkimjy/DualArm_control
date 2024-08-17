@@ -88,7 +88,7 @@
 
 		<!-- Torso Body -->
 		<body name="body_link" pos="0 0 0.65" euler="1.5707963 0 0">
-			<joint name="j0" pos="0 0 0" axis="0 1 0" type="slide" limited="true" range="-0.55 0.25" damping="5" frictionloss="1"/>
+			<joint name="j0" pos="0 0 0" axis="0 1 0" type="slide" limited="true" range="-0.15 0.25" damping="5" frictionloss="1"/>
 			<inertial pos="0.070879 0.38092 3.2435e-05" quat="0.999702 0.0241074 -0.0011948 0.0035823" 
 								mass="5.9559" diaginertia="0.0175723 0.0128361 0.0126716"/>
       		<geom type="mesh" mesh="body_link" rgba="0 0.6 1 1"/>

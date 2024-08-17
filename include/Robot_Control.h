@@ -13,6 +13,8 @@
 #include "NullControl/NullControl.hpp"
 #include "csvpp/Write.h"
 
+#include <qpOASES.hpp>
+
 using namespace std;
 
 //	Time Variables

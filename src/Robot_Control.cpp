@@ -374,6 +374,7 @@ void CRobotControl::computeControlInput()
 		if(sim_time > 18.0)
 			computeJointTorque(GRAV_COMP);
 		else
+			// computeJointTorque(GRAV_COMP);
 			// computeJointTorque(INV_DYN);
 			computeJointTorque(TORQUE);
 #endif
@@ -447,29 +448,52 @@ void CRobotControl::RightEEPlanner(double duration)
 
 void CRobotControl::CLIK()
 {
-	// if(initial_clik_flag == false)
-	// {
-	// 	qpos_init = robot.q;
-	// 	qpos_d = qpos_init;
-	// 	initial_clik_flag = true;
-	// }
+	if(initial_clik_flag == false)
+	{
+		qpos_init = robot.q;
+		qpos_d = qpos_init;
+		initial_clik_flag = true;
+	}
 
 	Eigen::MatrixXd InvJ;
 
-	NullCtrl.svd_pseudoInverse(Jp_EE[0], InvJ);
-	qpos_d += InvJ * (pdot_lEE_d + 20 * (p_lEE_d - p_lEE)) * robot.getSamplingTime();
-	// torq_cmd = 100 * (InvJ * (pdot_lEE_d + 3000 * (p_lEE_d - p_lEE)) - robot.qdot);
-	torq_cmd = 10 * (InvJ * (pdot_lEE_d + 20 * (p_lEE_d - p_lEE)) - robot.qdot) + 400 * (qpos_d - robot.q);
-	NullCtrl.svd_pseudoInverse(Jp_EE[1], InvJ);
-	qpos_d += InvJ * (pdot_rEE_d + 20 * (p_rEE_d - p_rEE)) * robot.getSamplingTime();
+	Eigen::Matrix<double, 6, TOTAL_DOF> Aug_Jp_EE;
+	Eigen::Matrix<double, 6, 1> X_cmd;
+	Eigen::Matrix<double, 6, 1> Xdot_cmd;
+	Eigen::Matrix<double, 6, 1> X_curr;
+	Aug_Jp_EE.block(0, 0, 3, TOTAL_DOF) = Jp_EE[0];
+	Aug_Jp_EE.block(3, 0, 3, TOTAL_DOF) = Jp_EE[1];
 
-	torq_cmd = 10 * (InvJ * (pdot_rEE_d + 20 * (p_rEE_d - p_rEE)) - robot.qdot) + 400 * (qpos_d - robot.q);
-	// torq_cmd += 100 * (InvJ * (pdot_rEE_d + 3000 * (p_rEE_d - p_rEE)) - robot.qdot);
+	X_cmd.segment<3>(0) = p_lEE_d;
+	X_cmd.segment<3>(3) = p_rEE_d;
+
+	Xdot_cmd.segment<3>(0) = pdot_lEE_d;
+	Xdot_cmd.segment<3>(3) = pdot_rEE_d;
+
+	X_curr.segment<3>(0) = p_lEE;
+	X_curr.segment<3>(3) = p_rEE;
+
+	NullCtrl.svd_pseudoInverse(Aug_Jp_EE, InvJ);
+	
+	qpos_d += InvJ * (Xdot_cmd + 5 * (X_cmd - X_curr)) * robot.getSamplingTime();
+	torq_cmd = robot.M_mat * (200 * (InvJ * (Xdot_cmd + 5 * (X_cmd - X_curr)) - robot.qdot) + 3500 * (qpos_d - robot.q));
+
+	// NullCtrl.svd_pseudoInverse(Jp_EE[0], InvJ);
+	// qpos_d += InvJ * (pdot_lEE_d + 200 * (p_lEE_d - p_lEE)) * robot.getSamplingTime();
+	// // torq_cmd = 100 * (InvJ * (pdot_lEE_d + 20 * (p_lEE_d - p_lEE)) - robot.qdot);
+	// torq_cmd = 10 * (InvJ * (pdot_lEE_d + 200 * (p_lEE_d - p_lEE)) - robot.qdot) + 1000 * (qpos_d - robot.q);
+	// NullCtrl.svd_pseudoInverse(Jp_EE[1], InvJ);
+	// qpos_d += InvJ * (pdot_rEE_d + 20 * (p_rEE_d - p_rEE)) * robot.getSamplingTime();
+
+	// torq_cmd = 10 * (InvJ * (pdot_rEE_d + 20 * (p_rEE_d - p_rEE)) - robot.qdot) + 1000 * (qpos_d - robot.q);
+	// // torq_cmd += 100 * (InvJ * (pdot_rEE_d + 20 * (p_rEE_d - p_rEE)) - robot.qdot);
 	
 	// base body joint pd control
 	// qpos_d(0) = 0.0;
 	// qvel_d(0) = 0.0;
-	torq_cmd(0) = 20000 * (qpos_d(0) - robot.q(0)) + 2000 * (qvel_d(0) - robot.qdot(0));	
+	// torq_cmd(0) = 20000 * (qpos_d(0) - robot.q(0)) + 2000 * (qvel_d(0) - robot.qdot(0));
+
+	// 자코비안 합치기, 오리엔테이션 에러, 커스텀 매스, makePhi 함수 참고하기. 
 }
 
 
@@ -513,6 +537,38 @@ void CRobotControl::NullSpacePlanner()
 
 void CRobotControl::OptimalControl()
 {
+    int numConstraints = 10;
+    int numDecisionVars = 10;
+
+    // Constraints (inequality, equality)
+    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> A(numConstraints, numDecisionVars);
+    Eigen::VectorXd lbA(numConstraints), ubA(numConstraints);  // clang-format off
+    // A << constraints.a_,
+    //     constraints.d_;
+
+    // lbA << constraints.b_,
+    //         constraints.f_;
+    // ubA << constraints.b_,
+    //         qpOASES::INFTY * Eigen::VectorXd::Ones(constraints.f_.size());
+
+    // Objective Function (Cost)
+    // WBCTask weightTasks = formulateWeightedTask();
+    // Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> H = weightTasks.a_.transpose() * weightTasks.a_;
+    // Eigen::VectorXd g = -weightTasks.a_.transpose() * weightTasks.b_;
+
+    // Solve
+    auto qpProblem = qpOASES::QProblem(numDecisionVars, numConstraints);
+    qpOASES::Options options;
+    options.setToMPC();
+    options.printLevel = qpOASES::PL_LOW;
+    options.enableEqualities = qpOASES::BT_TRUE;
+    qpProblem.setOptions(options);
+    int nWsr = 50;
+
+    // qpProblem.init(H.data(), g.data(), A.data(), nullptr, nullptr, lbA.data(), ubA.data(), nWsr);
+    Eigen::VectorXd qpSol(numDecisionVars);
+    qpProblem.getPrimalSolution(qpSol.data());
+
 	torq_cmd.setZero();	
 }
 
