@@ -112,12 +112,16 @@ public:
 
 	// remap p_EE -> p_XEE
 	Eigen::Vector3d p_lEE, p_rEE;
+	Eigen::Matrix3d R_lEE, R_rEE;
 	Eigen::Vector3d pdot_lEE, pdot_rEE;
+	Eigen::Vector3d omega_lEE, omega_rEE;
 	Eigen::Matrix<double, DOF3, TOTAL_DOF> Jp_lEE, Jr_lEE, Jdotp_lEE, Jdotr_lEE;
 	Eigen::Matrix<double, DOF3, TOTAL_DOF> Jp_rEE, Jr_rEE, Jdotp_rEE, Jdotr_rEE;
 
 	Eigen::Vector3d p_lEE_d, p_rEE_d;
+	Eigen::Matrix3d R_lEE_d, R_rEE_d;
 	Eigen::Vector3d pdot_lEE_d, pdot_rEE_d;
+	Eigen::Vector3d omega_lEE_d, omega_rEE_d;
 	Eigen::Vector3d pddot_lEE_d, pddot_rEE_d;
 
 	// cmd variables
@@ -176,3 +180,62 @@ public:
 	//	Check code validaty
 	void compareModelComputation(const mjModel* model, mjData* data, const int& count);
 };
+
+static Eigen::Matrix3d skew(Eigen::Vector3d src)
+{
+    Eigen::Matrix3d skew;
+    skew.setZero();
+    skew(0, 1) = -src[2];
+    skew(0, 2) = src[1];
+    skew(1, 0) = src[2];
+    skew(1, 2) = -src[0];
+    skew(2, 0) = -src[1];
+    skew(2, 1) = src[0];
+
+    return skew;
+}
+
+static Eigen::Vector3d getPhi(Eigen::Matrix3d& RotationMtx, Eigen::Matrix3d& DesiredRotationMtx) //Orientation 구성
+{
+    //Get SkewSymmetric
+    Eigen::Matrix3d s1_skew;
+    Eigen::Matrix3d s2_skew;
+    Eigen::Matrix3d s3_skew;
+
+    Eigen::Vector3d RotMtxcol1;
+    Eigen::Vector3d RotMtxcol2;
+    Eigen::Vector3d RotMtxcol3;
+    for (int i = 0; i < 3; i++)
+    {
+        RotMtxcol1(i) = RotationMtx(i, 0);
+        RotMtxcol2(i) = RotationMtx(i, 1);
+        RotMtxcol3(i) = RotationMtx(i, 2);
+    }
+
+    s1_skew = skew(RotMtxcol1);
+    s2_skew = skew(RotMtxcol2);
+    s3_skew = skew(RotMtxcol3);
+    /////////////////////////////////////////////////////////////
+    Eigen::Vector3d s1d;
+    Eigen::Vector3d s2d;
+    Eigen::Vector3d s3d;
+    for (int i = 0; i < 3; i++)
+    {
+        s1d(i) = DesiredRotationMtx(i, 0);
+        s2d(i) = DesiredRotationMtx(i, 1);
+        s3d(i) = DesiredRotationMtx(i, 2);
+    }
+
+    Eigen::Vector3d s1f;
+    Eigen::Vector3d s2f;
+    Eigen::Vector3d s3f;
+
+    s1f = s1_skew * s1d;
+    s2f = s2_skew * s2d;
+    s3f = s3_skew * s3d;
+    /////////////////////////////////////////////////////////////
+    //phi.resize(3);
+    Eigen::Vector3d phi;
+    phi = (s1f + s2f + s3f) * (-1.0 / 2.0);
+    return phi;
+}

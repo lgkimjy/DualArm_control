@@ -525,7 +525,8 @@ int main(int argc, char** argv) {
 #elif defined(DualArm)
 	const char* filename = "../model/KIST_DualArm/KIST DualArm.xml";
 #elif defined(DualArmHand)
-	const char* filename = "../model/KIST_DualArm-Hand/KIST DualArm-Hand.xml";
+	// const char* filename = "../model/KIST_DualArm-Hand/KIST DualArm-Hand.xml";
+	const char* filename = "../model/KIST_DualArm-Hand/scene.xml";
 #endif
 ////////////////////////////// USER CODE : END //////////////////////////////
 

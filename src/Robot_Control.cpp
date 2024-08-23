@@ -305,10 +305,14 @@ void CRobotControl::getFeedbackInformation(const mjData* data)
 void CRobotControl::mapEEvar()
 {
 	p_lEE = p_EE[0];
+	R_lEE = R_EE[0];
 	p_rEE = p_EE[1];
+	R_rEE = R_EE[1];
 
 	pdot_lEE = pdot_EE[0];
+	omega_lEE = omega_EE[0];
 	pdot_rEE = pdot_EE[1];
+	omega_rEE = omega_EE[1];
 }
 
 void CRobotControl::getUserCommand(mujoco::Simulate& sim)
@@ -457,43 +461,42 @@ void CRobotControl::CLIK()
 
 	Eigen::MatrixXd InvJ;
 
-	Eigen::Matrix<double, 6, TOTAL_DOF> Aug_Jp_EE;
-	Eigen::Matrix<double, 6, 1> X_cmd;
-	Eigen::Matrix<double, 6, 1> Xdot_cmd;
-	Eigen::Matrix<double, 6, 1> X_curr;
+	Eigen::Matrix<double, 12, TOTAL_DOF> Aug_Jp_EE;
+	Eigen::Matrix<double, 12, 1> X_cmd;
+	Eigen::Matrix<double, 12, 1> Xdot_cmd;
+	Eigen::Matrix<double, 12, 1> X_curr;
 	Aug_Jp_EE.block(0, 0, 3, TOTAL_DOF) = Jp_EE[0];
-	Aug_Jp_EE.block(3, 0, 3, TOTAL_DOF) = Jp_EE[1];
+	Aug_Jp_EE.block(3, 0, 3, TOTAL_DOF) = Jr_EE[0];
+	Aug_Jp_EE.block(6, 0, 3, TOTAL_DOF) = Jp_EE[1];
+	Aug_Jp_EE.block(9, 0, 3, TOTAL_DOF) = Jr_EE[1];
 
 	X_cmd.segment<3>(0) = p_lEE_d;
-	X_cmd.segment<3>(3) = p_rEE_d;
+	X_cmd.segment<3>(3).setZero();
+	X_cmd.segment<3>(6) = p_rEE_d;
+	X_cmd.segment<3>(9).setZero();
 
 	Xdot_cmd.segment<3>(0) = pdot_lEE_d;
-	Xdot_cmd.segment<3>(3) = pdot_rEE_d;
+	Xdot_cmd.segment<3>(3).setZero();
+	Xdot_cmd.segment<3>(6) = pdot_rEE_d;
+	Xdot_cmd.segment<3>(9).setZero();
+
+	R_lEE_d = R_lEE_d.setIdentity() * _Rot_Z(D2R(90)) * _Rot_Y(D2R(-90));
+	R_rEE_d = R_rEE_d.setIdentity() * _Rot_Z(D2R(90)) * _Rot_Y(D2R(-90));
 
 	X_curr.segment<3>(0) = p_lEE;
-	X_curr.segment<3>(3) = p_rEE;
+	X_curr.segment<3>(3) = getPhi(R_lEE, R_lEE_d);
+	X_curr.segment<3>(6) = p_rEE;
+	X_curr.segment<3>(9) = getPhi(R_rEE, R_rEE_d);
 
 	NullCtrl.svd_pseudoInverse(Aug_Jp_EE, InvJ);
 	
-	qpos_d += InvJ * (Xdot_cmd + 5 * (X_cmd - X_curr)) * robot.getSamplingTime();
-	torq_cmd = robot.M_mat * (200 * (InvJ * (Xdot_cmd + 5 * (X_cmd - X_curr)) - robot.qdot) + 3500 * (qpos_d - robot.q));
-
-	// NullCtrl.svd_pseudoInverse(Jp_EE[0], InvJ);
-	// qpos_d += InvJ * (pdot_lEE_d + 200 * (p_lEE_d - p_lEE)) * robot.getSamplingTime();
-	// // torq_cmd = 100 * (InvJ * (pdot_lEE_d + 20 * (p_lEE_d - p_lEE)) - robot.qdot);
-	// torq_cmd = 10 * (InvJ * (pdot_lEE_d + 200 * (p_lEE_d - p_lEE)) - robot.qdot) + 1000 * (qpos_d - robot.q);
-	// NullCtrl.svd_pseudoInverse(Jp_EE[1], InvJ);
-	// qpos_d += InvJ * (pdot_rEE_d + 20 * (p_rEE_d - p_rEE)) * robot.getSamplingTime();
-
-	// torq_cmd = 10 * (InvJ * (pdot_rEE_d + 20 * (p_rEE_d - p_rEE)) - robot.qdot) + 1000 * (qpos_d - robot.q);
-	// // torq_cmd += 100 * (InvJ * (pdot_rEE_d + 20 * (p_rEE_d - p_rEE)) - robot.qdot);
+	qpos_d += InvJ * (Xdot_cmd + 10 * (X_cmd - X_curr)) * robot.getSamplingTime();
+	torq_cmd = robot.M_mat * (40 * (InvJ * (Xdot_cmd + 10 * (X_cmd - X_curr)) - robot.qdot) + 1000 * (qpos_d - robot.q));
 	
 	// base body joint pd control
 	// qpos_d(0) = 0.0;
 	// qvel_d(0) = 0.0;
 	// torq_cmd(0) = 20000 * (qpos_d(0) - robot.q(0)) + 2000 * (qvel_d(0) - robot.qdot(0));
-
-	// 자코비안 합치기, 오리엔테이션 에러, 커스텀 매스, makePhi 함수 참고하기. 
 }
 
 
