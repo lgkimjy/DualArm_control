@@ -235,7 +235,7 @@ void CRobotControl::UserControl(mjModel* model, mjData* data)
 		mapEEvar();
 
 		/////	Compute Control Input & Output Control Input
-		computeControlInput();
+		computeControlInput(data);
 
 		for (i = 0; i < model->nu; i++) {
 			data->ctrl[i] = joint_torq(i);
@@ -300,6 +300,26 @@ void CRobotControl::getFeedbackInformation(const mjData* data)
 	/////	Compute joint acceleration by numerical diff.
 	robot.xiddot = (robot.xidot - robot.xidot_tmp) / robot.getSamplingTime();
 	robot.xidot_tmp = robot.xidot;
+
+	if(sim_time < TORQUE_ON + INITIAL_POSE) {
+		data->mocap_pos[0] = p_EE[0](0);
+		data->mocap_pos[1] = p_EE[0](1);
+		data->mocap_pos[2] = p_EE[0](2);
+		data->mocap_quat[0] = _Rot2Quat(R_EE[0])[0];
+		data->mocap_quat[1] = _Rot2Quat(R_EE[0])[1];
+		data->mocap_quat[2] = _Rot2Quat(R_EE[0])[2];
+		data->mocap_quat[3] = _Rot2Quat(R_EE[0])[3];
+	// }
+
+	// if(sim_time < TORQUE_ON + INITIAL_POSE) {
+		data->mocap_pos[3] = p_EE[1](0);
+		data->mocap_pos[4] = p_EE[1](1);
+		data->mocap_pos[5] = p_EE[1](2);
+		data->mocap_quat[4] = _Rot2Quat(R_EE[1])[0];
+		data->mocap_quat[5] = _Rot2Quat(R_EE[1])[1];
+		data->mocap_quat[6] = _Rot2Quat(R_EE[1])[2];
+		data->mocap_quat[7] = _Rot2Quat(R_EE[1])[3];
+	}
 }
 
 void CRobotControl::mapEEvar()
@@ -317,26 +337,6 @@ void CRobotControl::mapEEvar()
 
 void CRobotControl::getUserCommand(mujoco::Simulate& sim)
 {
-	// for(int i=0; i<3; i++) {
-	// 	des_lin_vel(i) = sim.des_vel[i];
-	// }
-
-    // double yaw = std::atan2(robot.R_B(0, 1), robot.R_B(0, 0));
-    // std::cout << "yaw_degrees: " << yaw << std::endl;
-	// std::cout << yaw + des_lin_vel(2) * 0.001 << std::endl;
-	// // _Rot2EulZXY
-
-	// std::cout << ori_B_ref.transpose() << std::endl;
-	// ori_B_ref(0) += des_lin_vel(2) * 0.001;
-	// ori_B_d = ori_B_ref;
-
-	// // if(sim_time > 10.0)
-	// // 	des_lin_vel(0) = 0.2;
-	// // // else if(sim_time > 22.0)
-	// // 	des_lin_vel(0) = 0.4;
-
-	// std::cout << sim.mode << std::endl;
-
 	if(sim.mode == 1) {
 		TaskCmd = TORQ_ON;
 	} else if(sim.mode == 2) {
@@ -346,42 +346,33 @@ void CRobotControl::getUserCommand(mujoco::Simulate& sim)
 	}
 }
 
-void CRobotControl::computeControlInput()
+void CRobotControl::computeControlInput(mjData* data)
 {
-
 	if(sim_time < TORQUE_ON){
-		computeJointTorque(JOINT_PD);
 		p_lEE_d = p_lEE;
 		p_rEE_d = p_rEE;
+		computeJointTorque(JOINT_PD);
 	}
 	else if(sim_time < TORQUE_ON + INITIAL_POSE) {
-		JointPlanner(INITIAL_POSE);
-		computeJointTorque(JOINT_PD);
 		p_lEE_d = p_lEE;
 		p_rEE_d = p_rEE;
+		JointPlanner(INITIAL_POSE);
+		computeJointTorque(JOINT_PD);
 	}
 	else
 	{	
-		LeftEEPlanner(14.0);
-		RightEEPlanner(14.0);
+		// LeftEEPlanner(14.0);
+		// RightEEPlanner(14.0);
+		// CLIK(data);
+		// if(sim_time > 18.0)	computeJointTorque(GRAV_COMP);
+		// else				computeJointTorque(INV_DYN);
 
-		CLIK();
+		OperationalSpaceControl(data);
+		computeJointTorque(TORQUE);		// JOINT_PD, TORQUE, GRAV_COMP, INV_DYN
+
 		// NullSpacePlanner();
 		// OptimalControl();
-
-#if defined(YORI)
-#elif defined(ArmHand)
-#elif defined(DualArm)
-#elif defined(DualArmHand)
-		// computeJointTorque(JOINT_PD);
-		// computeJointTorque(TORQUE);
-		if(sim_time > 18.0)
-			computeJointTorque(GRAV_COMP);
-		else
-			// computeJointTorque(GRAV_COMP);
-			// computeJointTorque(INV_DYN);
-			computeJointTorque(TORQUE);
-#endif
+		// computeJointTorque(TORQUE);		// JOINT_PD, TORQUE, GRAV_COMP, INV_DYN
 		lEE_d.add(sim_time, p_lEE_d(0), p_lEE_d(1), p_lEE_d(2), pdot_lEE_d(0), pdot_lEE_d(1), pdot_lEE_d(2));
 	}
 }
@@ -450,7 +441,118 @@ void CRobotControl::RightEEPlanner(double duration)
 	rEE_local_t += robot.getSamplingTime();
 }
 
-void CRobotControl::CLIK()
+void CRobotControl::OperationalSpaceControl(mjData* data)
+{
+	if(initial_clik_flag == false)
+	{
+		qpos_init = robot.q;
+		qpos_d = qpos_init;
+		initial_clik_flag = true;
+	}
+
+	Eigen::MatrixXd InvJ;
+
+	// Eigen::Matrix<double, 6, TOTAL_DOF> Aug_Jp_EE;
+	// Eigen::Matrix<double, 6, 1> X_cmd;
+	// Eigen::Matrix<double, 6, 1> Xdot_cmd;
+	// Eigen::Matrix<double, 6, 1> X_curr;
+	// Eigen::Matrix<double, 6, 1> Xdot_curr;
+	// Eigen::Matrix<double, 6, 1> X_err;
+	// Eigen::Matrix<double, 6, 1> Xdot_err;
+	// Aug_Jp_EE.block(0, 0, 3, TOTAL_DOF) = Jp_EE[0];
+	// Aug_Jp_EE.block(3, 0, 3, TOTAL_DOF) = Jp_EE[1];
+
+	// X_cmd(0) = data->mocap_pos[0];
+	// X_cmd(1) = data->mocap_pos[1];
+	// X_cmd(2) = data->mocap_pos[2];
+	// X_cmd(3) = data->mocap_pos[3];
+	// X_cmd(4) = data->mocap_pos[4];
+	// X_cmd(5) = data->mocap_pos[5];
+
+	// Xdot_cmd.segment<3>(0).setZero();
+	// Xdot_cmd.segment<3>(3).setZero();
+
+	// X_curr.segment<3>(0) = p_lEE;
+	// X_curr.segment<3>(3) = p_rEE;
+	// Xdot_curr.segment<3>(0) = pdot_lEE;
+	// Xdot_curr.segment<3>(3) = pdot_rEE;
+
+	// X_err = X_cmd - X_curr;
+	// Xdot_err = Xdot_cmd - Xdot_curr;
+
+	// NullCtrl.svd_pseudoInverse(Aug_Jp_EE, InvJ);
+
+	// // torq_cmd = robot.M_mat * Aug_Jp_EE.transpose() * (250 * Xdot_err + 1500 * X_err);		// jacobian transpose
+	// torq_cmd = robot.M_mat * InvJ * (250 * Xdot_err + 1500 * X_err);							// jacobian pseudo-inverse
+	// torq_cmd += robot.C_mat * robot.qdot + robot.g_vec;										// operational space control (only control position of end-effector)
+	
+	// Eigen::Matrix<double, ACTIVE_DOF, ACTIVE_DOF> I34;
+	// I34.setIdentity();
+	// torq_cmd += (I34 - InvJ * Aug_Jp_EE) * (K_qp * (qpos_init - robot.q) - K_qv * robot.qdot);	// Null space control
+
+
+	Eigen::Matrix<double, 12, TOTAL_DOF> Aug_Jp_EE;
+	Eigen::Matrix<double, 12, 1> X_cmd;
+	Eigen::Matrix<double, 12, 1> Xdot_cmd;
+	Eigen::Matrix<double, 12, 1> X_curr;
+	Eigen::Matrix<double, 12, 1> Xdot_curr;
+	Eigen::Matrix<double, 12, 1> X_err;
+	Eigen::Matrix<double, 12, 1> Xdot_err;
+	Aug_Jp_EE.block(0, 0, 3, TOTAL_DOF) = Jp_EE[0];
+	Aug_Jp_EE.block(3, 0, 3, TOTAL_DOF) = Jr_EE[0];
+	Aug_Jp_EE.block(6, 0, 3, TOTAL_DOF) = Jp_EE[1];
+	Aug_Jp_EE.block(9, 0, 3, TOTAL_DOF) = Jr_EE[1];
+
+	X_cmd.setZero();
+	X_cmd(0) = data->mocap_pos[0];
+	X_cmd(1) = data->mocap_pos[1];
+	X_cmd(2) = data->mocap_pos[2];
+	X_cmd(6) = data->mocap_pos[3];
+	X_cmd(7) = data->mocap_pos[4];
+	X_cmd(8) = data->mocap_pos[5];
+
+	Xdot_cmd.segment<3>(0).setZero();
+	Xdot_cmd.segment<3>(3).setZero();
+	Xdot_cmd.segment<3>(6).setZero();
+	Xdot_cmd.segment<3>(9).setZero();
+
+	X_curr.setZero();
+	Xdot_curr.setZero();
+	X_curr.segment<3>(0) = p_lEE;
+	X_curr.segment<3>(6) = p_rEE;
+	Xdot_curr.segment<3>(0) = pdot_lEE;
+	Xdot_curr.segment<3>(6) = pdot_rEE;
+
+	X_err = X_cmd - X_curr;
+	Xdot_err = Xdot_cmd - Xdot_curr;
+
+	Eigen::Vector4d quat_tmp;
+	quat_tmp << data->mocap_quat[0], data->mocap_quat[1], data->mocap_quat[2], data->mocap_quat[3];
+    Eigen::Matrix3d errorMatrix = _Quat2Rot(quat_tmp) * R_lEE.transpose();
+    Eigen::AngleAxisd errorAngleAxis(errorMatrix);
+	errorAngleAxis.angle() * errorAngleAxis.axis().transpose();
+	X_err.segment<3>(3) = errorAngleAxis.angle() * errorAngleAxis.axis().transpose();
+
+	quat_tmp << data->mocap_quat[4], data->mocap_quat[5], data->mocap_quat[6], data->mocap_quat[7];
+	errorMatrix = _Quat2Rot(quat_tmp) * R_rEE.transpose();
+	errorAngleAxis = Eigen::AngleAxisd(errorMatrix);
+
+	X_err.segment<3>(9) = errorAngleAxis.angle() * errorAngleAxis.axis().transpose();
+	Xdot_err.segment<3>(3) = -omega_lEE;
+	Xdot_err.segment<3>(9) = -omega_rEE;
+
+	NullCtrl.svd_pseudoInverse(Aug_Jp_EE, InvJ);
+
+	// torq_cmd = robot.M_mat * Aug_Jp_EE.transpose() * (250 * Xdot_err + 1500 * X_err);		// jacobian transpose
+	torq_cmd = robot.M_mat * InvJ * (250 * Xdot_err + 1500 * X_err);							// jacobian pseudo-inverse
+	torq_cmd += robot.C_mat * robot.qdot + robot.g_vec;											// operational space control (6D)
+	
+	Eigen::Matrix<double, ACTIVE_DOF, ACTIVE_DOF> I34;
+	I34.setIdentity();
+	torq_cmd += (I34 - InvJ * Aug_Jp_EE) * (K_qp * (qpos_init - robot.q) - K_qv * robot.qdot);	// added for null space control
+}
+
+void CRobotControl::CLIK(mjData* data)
 {
 	if(initial_clik_flag == false)
 	{
@@ -470,28 +572,36 @@ void CRobotControl::CLIK()
 	Aug_Jp_EE.block(6, 0, 3, TOTAL_DOF) = Jp_EE[1];
 	Aug_Jp_EE.block(9, 0, 3, TOTAL_DOF) = Jr_EE[1];
 
-	X_cmd.segment<3>(0) = p_lEE_d;
-	X_cmd.segment<3>(3).setZero();
-	X_cmd.segment<3>(6) = p_rEE_d;
-	X_cmd.segment<3>(9).setZero();
+	X_cmd(0) = data->mocap_pos[0];
+	X_cmd(1) = data->mocap_pos[1];
+	X_cmd(2) = data->mocap_pos[2];
+	Eigen::Vector3d temp1 = _Rot2Eul(_Quat2Rot({data->mocap_quat[0], data->mocap_quat[1], data->mocap_quat[2], data->mocap_quat[3]}));
+	X_cmd.segment<3>(3) = temp1;
+	X_cmd(6) = data->mocap_pos[3];
+	X_cmd(7) = data->mocap_pos[4];
+	X_cmd(8) = data->mocap_pos[5];
+	Eigen::Vector3d temp2 = _Rot2Eul(_Quat2Rot({data->mocap_quat[4], data->mocap_quat[5], data->mocap_quat[6], data->mocap_quat[7]}));
+	X_cmd.segment<3>(9) = temp2;
 
-	Xdot_cmd.segment<3>(0) = pdot_lEE_d;
+	Xdot_cmd.segment<3>(0).setZero();
 	Xdot_cmd.segment<3>(3).setZero();
-	Xdot_cmd.segment<3>(6) = pdot_rEE_d;
+	Xdot_cmd.segment<3>(6).setZero();
 	Xdot_cmd.segment<3>(9).setZero();
 
-	R_lEE_d = R_lEE_d.setIdentity() * _Rot_Z(D2R(90)) * _Rot_Y(D2R(-90));
-	R_rEE_d = R_rEE_d.setIdentity() * _Rot_Z(D2R(90)) * _Rot_Y(D2R(-90));
+	// R_lEE_d = R_lEE_d.setIdentity() * _Rot_Z(D2R(90)) * _Rot_Y(D2R(-90));
+	// R_rEE_d = R_rEE_d.setIdentity() * _Rot_Z(D2R(90)) * _Rot_Y(D2R(-90));
 
 	X_curr.segment<3>(0) = p_lEE;
-	X_curr.segment<3>(3) = getPhi(R_lEE, R_lEE_d);
+	// X_curr.segment<3>(3) = getPhi(R_lEE, R_lEE_d);
+	X_curr.segment<3>(3) = _Rot2Eul(R_lEE);
 	X_curr.segment<3>(6) = p_rEE;
-	X_curr.segment<3>(9) = getPhi(R_rEE, R_rEE_d);
+	// X_curr.segment<3>(9) = getPhi(R_rEE, R_rEE_d);
+	X_curr.segment<3>(9) = _Rot2Eul(R_rEE);
 
 	NullCtrl.svd_pseudoInverse(Aug_Jp_EE, InvJ);
 	
 	qpos_d += InvJ * (Xdot_cmd + 10 * (X_cmd - X_curr)) * robot.getSamplingTime();
-	torq_cmd = robot.M_mat * (40 * (InvJ * (Xdot_cmd + 10 * (X_cmd - X_curr)) - robot.qdot) + 1000 * (qpos_d - robot.q));
+	torq_cmd = robot.M_mat * (40 * (InvJ * (Xdot_cmd + 10 * (X_cmd - X_curr)) - robot.qdot) + 1000 * (qpos_d - robot.q)) + robot.C_mat * robot.qdot + robot.g_vec;
 	
 	// base body joint pd control
 	// qpos_d(0) = 0.0;
@@ -588,11 +698,6 @@ void CRobotControl::computeJointTorque(CtrlType type)
 		qpos_d = robot.q;
 		qvel_d = robot.qdot;
 		joint_torq = robot.M_mat * (500 * (qpos_d - robot.q) + 20 * (qvel_d - robot.qdot)) + robot.C_mat * robot.qdot + robot.g_vec;
-		
-		// addded Joint PD for base body prismatic motion
-		qpos_d(0) = qpos_ref(0);
-		qvel_d(0) = 0.0;
-		joint_torq(0) = 20000 * (qpos_d(0) - robot.q(0)) + 2000 * (qvel_d(0) - robot.qdot(0));	
 	}
 	else if(type == TORQUE)
 	{

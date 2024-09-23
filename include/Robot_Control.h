@@ -152,9 +152,10 @@ public:
 	void LeftEEPlanner(double duration);
 	void RightEEPlanner(double duration);
 	void assignSelectedJointTask(std::vector<int> selectedJoints);
-	void CLIK();
+	void CLIK(mjData* data);
 	void CTC(); // computed torque control
 	void RAC();	// resolved acceleration control
+	void OperationalSpaceControl(mjData* data);
 	void NullSpacePlanner();
 	void OptimalControl();
 	void computeJointTorque(CtrlType type);
@@ -171,7 +172,7 @@ public:
 
 	void UserControl(mjModel* uModel, mjData* uData);
 	void getFeedbackInformation(const mjData* data);
-	void computeControlInput();
+	void computeControlInput(mjData* data);
 
 	void computeCoMMotion();
 	void computeEEKinematics(Eigen::Matrix<double, TOTAL_DOF, 1>& xidot);

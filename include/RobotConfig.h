@@ -101,7 +101,7 @@ constexpr int NO_OF_HAND = 2;
 constexpr int NO_OF_R_FINGER = 4;
 constexpr int NO_OF_L_FINGER = 2;
 
-constexpr int DOF_TORSO = 1;
+constexpr int DOF_TORSO = 0;
 constexpr int DOF_ARM = 7;
 constexpr int DOF_R_FINGER = 4;
 constexpr int DOF_L_FINGER = 2;
