@@ -370,6 +370,7 @@ void CRobotControl::computeControlInput(mjData* data)
 		OperationalSpaceControl(data);
 		computeJointTorque(TORQUE);		// JOINT_PD, TORQUE, GRAV_COMP, INV_DYN
 
+		// bimanualTaskControl(data);
 		// NullSpacePlanner();
 		// OptimalControl();
 		// computeJointTorque(TORQUE);		// JOINT_PD, TORQUE, GRAV_COMP, INV_DYN
@@ -609,6 +610,10 @@ void CRobotControl::CLIK(mjData* data)
 	// torq_cmd(0) = 20000 * (qpos_d(0) - robot.q(0)) + 2000 * (qvel_d(0) - robot.qdot(0));
 }
 
+void CRobotControl::bimanualTaskControl(mjData* data)
+{
+	// maintain euclidean distance? or maintain relative position?
+}
 
 void CRobotControl::NullSpacePlanner()
 {

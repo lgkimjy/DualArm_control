@@ -156,6 +156,7 @@ public:
 	void CTC(); // computed torque control
 	void RAC();	// resolved acceleration control
 	void OperationalSpaceControl(mjData* data);
+	void bimanualTaskControl(mjData* data);
 	void NullSpacePlanner();
 	void OptimalControl();
 	void computeJointTorque(CtrlType type);
