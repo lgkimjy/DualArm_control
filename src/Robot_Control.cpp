@@ -119,9 +119,6 @@ void CRobotControl::initEEParameters(const mjModel* model)
 	pddot_lEE_d.setZero();
 	pddot_rEE_d.setZero();
 
-	TaskCmd = TORQ_OFF;
-	PrevTaskCmd = TORQ_OFF;
-
 	qddot_cmd.setZero();
 	torq_cmd.setZero();
 
@@ -188,6 +185,11 @@ void CRobotControl::initCtrlParameters(const mjModel* model_mj)
 	{
 		std::cerr << "Config File Parse ERROR" << std::endl;
 	}
+
+	TaskCmd = STAY;
+	PrevTaskCmd = STAY;
+	bool_activate_controller = false;
+	bool_task_command_change = false;
 }
 
 
@@ -300,26 +302,6 @@ void CRobotControl::getFeedbackInformation(const mjData* data)
 	/////	Compute joint acceleration by numerical diff.
 	robot.xiddot = (robot.xidot - robot.xidot_tmp) / robot.getSamplingTime();
 	robot.xidot_tmp = robot.xidot;
-
-	if(sim_time < TORQUE_ON + INITIAL_POSE) {
-		data->mocap_pos[0] = p_EE[0](0);
-		data->mocap_pos[1] = p_EE[0](1);
-		data->mocap_pos[2] = p_EE[0](2);
-		data->mocap_quat[0] = _Rot2Quat(R_EE[0])[0];
-		data->mocap_quat[1] = _Rot2Quat(R_EE[0])[1];
-		data->mocap_quat[2] = _Rot2Quat(R_EE[0])[2];
-		data->mocap_quat[3] = _Rot2Quat(R_EE[0])[3];
-	// }
-
-	// if(sim_time < TORQUE_ON + INITIAL_POSE) {
-		data->mocap_pos[3] = p_EE[1](0);
-		data->mocap_pos[4] = p_EE[1](1);
-		data->mocap_pos[5] = p_EE[1](2);
-		data->mocap_quat[4] = _Rot2Quat(R_EE[1])[0];
-		data->mocap_quat[5] = _Rot2Quat(R_EE[1])[1];
-		data->mocap_quat[6] = _Rot2Quat(R_EE[1])[2];
-		data->mocap_quat[7] = _Rot2Quat(R_EE[1])[3];
-	}
 }
 
 void CRobotControl::mapEEvar()
@@ -337,45 +319,164 @@ void CRobotControl::mapEEvar()
 
 void CRobotControl::getUserCommand(mujoco::Simulate& sim)
 {
-	if(sim.mode == 1) {
-		TaskCmd = TORQ_ON;
-	} else if(sim.mode == 2) {
-		TaskCmd = READY;
+	if(sim.torq_onoff == 0) {
+        bool_activate_controller = false;
+		TaskCmd = STAY;
+		qpos_d = robot.q;
+	} else if(sim.torq_onoff == 1) {
+        bool_activate_controller = true;
+		if(sim.controller == 0) 		TaskCmd = STAY;
+		else if(sim.controller == 1)	TaskCmd = READY;
+		else if(sim.controller == 2)	TaskCmd = G_COMPENSATE;
+		else if(sim.controller == 3)	TaskCmd = CL_IK;
+		else if(sim.controller == 4)	TaskCmd = OCS_POS;
+		else if(sim.controller == 5)	TaskCmd = OCS_POSE;
+		else if(sim.controller == 6)	TaskCmd = BIMANUAL;
+		else {
+			std::cout << "Invalid Controller Command" << std::endl;
+		}
 	} else {
-		TaskCmd = TORQ_ON;
+		std::cout << "Invalid Torque Command" << std::endl;
 	}
+
+	if(PrevTaskCmd != TaskCmd) {
+		bool_task_command_change = true;
+	} else {
+		bool_task_command_change = false;
+	}
+	PrevTaskCmd = TaskCmd;
 }
 
 void CRobotControl::computeControlInput(mjData* data)
 {
-	if(sim_time < TORQUE_ON){
-		p_lEE_d = p_lEE;
-		p_rEE_d = p_rEE;
-		computeJointTorque(JOINT_PD);
-	}
-	else if(sim_time < TORQUE_ON + INITIAL_POSE) {
-		p_lEE_d = p_lEE;
-		p_rEE_d = p_rEE;
-		JointPlanner(INITIAL_POSE);
-		computeJointTorque(JOINT_PD);
+	if(bool_activate_controller == true)
+	{
+		if(bool_task_command_change == true) 
+		{
+			qpos_d = robot.q;
+			qvel_d.setZero();
+			qacc_d.setZero();
+
+			Joint_Traj.is_moving_ = false;
+			bool_task_command_change = false;
+		}
+
+		if(TaskCmd == STAY) {
+			p_lEE_d = p_lEE;
+			p_rEE_d = p_rEE;
+
+			data->mocap_pos[0] = p_EE[0](0);
+			data->mocap_pos[1] = p_EE[0](1);
+			data->mocap_pos[2] = p_EE[0](2);
+			data->mocap_quat[0] = _Rot2Quat(R_EE[0])[0];
+			data->mocap_quat[1] = _Rot2Quat(R_EE[0])[1];
+			data->mocap_quat[2] = _Rot2Quat(R_EE[0])[2];
+			data->mocap_quat[3] = _Rot2Quat(R_EE[0])[3];
+			data->mocap_pos[3] = p_EE[1](0);
+			data->mocap_pos[4] = p_EE[1](1);
+			data->mocap_pos[5] = p_EE[1](2);
+			data->mocap_quat[4] = _Rot2Quat(R_EE[1])[0];
+			data->mocap_quat[5] = _Rot2Quat(R_EE[1])[1];
+			data->mocap_quat[6] = _Rot2Quat(R_EE[1])[2];
+			data->mocap_quat[7] = _Rot2Quat(R_EE[1])[3];
+			computeJointTorque(JOINT_PD);
+		}
+		else if(TaskCmd == G_COMPENSATE) {
+			// computeJointTorque(TORQUE);		// JOINT_PD, TORQUE, GRAV_COMP, INV_DYN
+		}
+		else if(TaskCmd == READY) {
+			p_lEE_d = p_lEE;
+			p_rEE_d = p_rEE;
+
+			data->mocap_pos[0] = p_EE[0](0);
+			data->mocap_pos[1] = p_EE[0](1);
+			data->mocap_pos[2] = p_EE[0](2);
+			data->mocap_quat[0] = _Rot2Quat(R_EE[0])[0];
+			data->mocap_quat[1] = _Rot2Quat(R_EE[0])[1];
+			data->mocap_quat[2] = _Rot2Quat(R_EE[0])[2];
+			data->mocap_quat[3] = _Rot2Quat(R_EE[0])[3];
+			data->mocap_pos[3] = p_EE[1](0);
+			data->mocap_pos[4] = p_EE[1](1);
+			data->mocap_pos[5] = p_EE[1](2);
+			data->mocap_quat[4] = _Rot2Quat(R_EE[1])[0];
+			data->mocap_quat[5] = _Rot2Quat(R_EE[1])[1];
+			data->mocap_quat[6] = _Rot2Quat(R_EE[1])[2];
+			data->mocap_quat[7] = _Rot2Quat(R_EE[1])[3];
+			JointPlanner(INITIAL_POSE);
+			computeJointTorque(JOINT_PD);
+		}
+		else if(TaskCmd == CL_IK) {
+			LeftEEPlanner(14.0);
+			RightEEPlanner(14.0);
+			CLIK(data);
+			computeJointTorque(TORQUE);	// INV_DYN
+		}
+		else if(TaskCmd == OCS_POS) {
+			// computeJointTorque(TORQUE);		// JOINT_PD, TORQUE, GRAV_COMP, INV_DYN
+		}
+		else if(TaskCmd == OCS_POSE) {
+			p_lEE_d = p_lEE;
+			p_rEE_d = p_rEE;
+			OperationalSpaceControl(data);
+			computeJointTorque(TORQUE);		// JOINT_PD, TORQUE, GRAV_COMP, INV_DYN
+		}
+		else if(TaskCmd == BIMANUAL) {
+			// bimanualTaskControl(data);
+			// NullSpacePlanner();
+			// OptimalControl();
+			// computeJointTorque(TORQUE);		// JOINT_PD, TORQUE, GRAV_COMP, INV_DYN
+		}
 	}
 	else
-	{	
-		// LeftEEPlanner(14.0);
-		// RightEEPlanner(14.0);
-		// CLIK(data);
-		// if(sim_time > 18.0)	computeJointTorque(GRAV_COMP);
-		// else				computeJointTorque(INV_DYN);
+	{
+		p_lEE_d = p_lEE;
+		p_rEE_d = p_rEE;
 
-		OperationalSpaceControl(data);
-		computeJointTorque(TORQUE);		// JOINT_PD, TORQUE, GRAV_COMP, INV_DYN
-
-		// bimanualTaskControl(data);
-		// NullSpacePlanner();
-		// OptimalControl();
-		// computeJointTorque(TORQUE);		// JOINT_PD, TORQUE, GRAV_COMP, INV_DYN
-		lEE_d.add(sim_time, p_lEE_d(0), p_lEE_d(1), p_lEE_d(2), pdot_lEE_d(0), pdot_lEE_d(1), pdot_lEE_d(2));
+		data->mocap_pos[0] = p_EE[0](0);
+		data->mocap_pos[1] = p_EE[0](1);
+		data->mocap_pos[2] = p_EE[0](2);
+		data->mocap_quat[0] = _Rot2Quat(R_EE[0])[0];
+		data->mocap_quat[1] = _Rot2Quat(R_EE[0])[1];
+		data->mocap_quat[2] = _Rot2Quat(R_EE[0])[2];
+		data->mocap_quat[3] = _Rot2Quat(R_EE[0])[3];
+		data->mocap_pos[3] = p_EE[1](0);
+		data->mocap_pos[4] = p_EE[1](1);
+		data->mocap_pos[5] = p_EE[1](2);
+		data->mocap_quat[4] = _Rot2Quat(R_EE[1])[0];
+		data->mocap_quat[5] = _Rot2Quat(R_EE[1])[1];
+		data->mocap_quat[6] = _Rot2Quat(R_EE[1])[2];
+		data->mocap_quat[7] = _Rot2Quat(R_EE[1])[3];
+		joint_torq.setZero();
 	}
+	lEE_d.add(sim_time, p_lEE_d(0), p_lEE_d(1), p_lEE_d(2), pdot_lEE_d(0), pdot_lEE_d(1), pdot_lEE_d(2));
+
+	// if(sim_time < TORQUE_ON){
+	// 	p_lEE_d = p_lEE;
+	// 	p_rEE_d = p_rEE;
+	// 	computeJointTorque(JOINT_PD);
+	// }
+	// else if(sim_time < TORQUE_ON + INITIAL_POSE) {
+	// 	p_lEE_d = p_lEE;
+	// 	p_rEE_d = p_rEE;
+	// 	JointPlanner(INITIAL_POSE);
+	// 	computeJointTorque(JOINT_PD);
+	// }
+	// else
+	// {	
+	// 	// LeftEEPlanner(14.0);
+	// 	// RightEEPlanner(14.0);
+	// 	// CLIK(data);
+	// 	// if(sim_time > 18.0)	computeJointTorque(GRAV_COMP);
+	// 	// else				computeJointTorque(INV_DYN);
+
+	// 	OperationalSpaceControl(data);
+	// 	computeJointTorque(TORQUE);		// JOINT_PD, TORQUE, GRAV_COMP, INV_DYN
+
+	// 	// bimanualTaskControl(data);
+	// 	// NullSpacePlanner();
+	// 	// OptimalControl();
+	// 	// computeJointTorque(TORQUE);		// JOINT_PD, TORQUE, GRAV_COMP, INV_DYN
+	// }
 }
 
 void CRobotControl::JointPlanner(double duration)
@@ -612,7 +713,37 @@ void CRobotControl::CLIK(mjData* data)
 
 void CRobotControl::bimanualTaskControl(mjData* data)
 {
+	if(initial_clik_flag == false)
+	{
+		qpos_init = robot.q;
+		qpos_d = qpos_init;
+		initial_clik_flag = true;
+	}
+
+	Eigen::MatrixXd InvJ;
+
 	// maintain euclidean distance? or maintain relative position?
+	Eigen::Vector3d p_target;
+	p_target << data->mocap_pos[6], data->mocap_pos[7], data->mocap_pos[8];
+	Eigen::Vector3d err_relative = p_lEE - p_rEE;
+	Eigen::Vector3d err1 = p_target - p_lEE;
+	Eigen::Vector3d err2 = p_target - p_rEE;
+	Eigen::Vector3d err_total = 100 * (err1 + err2);// + err_relative;
+
+	Eigen::Matrix<double, 6, TOTAL_DOF> Aug_Jp_EE;
+	Eigen::Matrix<double, 12, 1> X_cmd;
+	Eigen::Matrix<double, 12, 1> Xdot_cmd;
+	Eigen::Matrix<double, 12, 1> X_curr;
+	Aug_Jp_EE.block(0, 0, 3, TOTAL_DOF) = Jp_EE[0];
+	Aug_Jp_EE.block(3, 0, 3, TOTAL_DOF) = Jp_EE[1];
+
+	torq_cmd = Jp_EE[0].transpose() * 100 * err_total + 1*robot.qdot;
+	torq_cmd += Jp_EE[1].transpose() * 100 * err_total + 1*robot.qdot;
+
+	Eigen::Matrix<double, ACTIVE_DOF, ACTIVE_DOF> I34;
+	I34.setIdentity();
+	NullCtrl.svd_pseudoInverse(Aug_Jp_EE, InvJ);
+	torq_cmd += (I34 - InvJ * Aug_Jp_EE) * (K_qp * (qpos_init - robot.q) - K_qv * robot.qdot);	// added for null space control
 }
 
 void CRobotControl::NullSpacePlanner()

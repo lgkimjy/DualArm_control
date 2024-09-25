@@ -43,8 +43,8 @@ void visualize_state_planner(mj::Simulate& sim)
 
   for(int i = 0; i < 3; ++i)
   {
-    sim.lEE[i] = robot_control.p_EE[0](i);
-    sim.rEE[i] = robot_control.p_EE[1](i);
+    sim.lEE[i] = robot_control.p_lEE(i);
+    sim.rEE[i] = robot_control.p_rEE(i);
     sim.lEE_d[i] = robot_control.p_lEE_d(i);
     sim.rEE_d[i] = robot_control.p_rEE_d(i);
   }

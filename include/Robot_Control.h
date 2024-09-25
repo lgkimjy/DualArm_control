@@ -7,6 +7,7 @@
 
 #include "Simulator/Robot_Simulate.hpp"
 
+#include "Robot_Task.hpp"
 #include "ARBMLlib/ARBML.h"
 #include "Trajectory/JointTrajectory.h"
 #include "SplineLibs/CubicSpline.h"
@@ -24,24 +25,9 @@ constexpr sysReal INITIAL_POSE = 2.0;				//	Second
 //	Multiple of Simulation Step(Forward dynamics) > 1
 constexpr int CONTROL_RATE = 1;
 
-typedef enum {
-	TORQ_OFF	= 0X01,
-	TORQ_ON 	= 0X02,
-	READY		= 0X03,
-	CLIK		= 0X04,
-}TaskCmdType;
-
-typedef enum {
-	JOINT_PD 	= 0X01,
-	INV_DYN	 	= 0X02,
-	TORQUE		= 0X03,
-	GRAV_COMP	= 0X04,
-}CtrlType;
-
 class CRobotControl
 {
 private:
-
 public:
 	
 	CARBML robot;
@@ -93,8 +79,11 @@ public:
 	////////////////////////////////////////////
 	////////////////	JY CODE	////////////////
 	////////////////////////////////////////////
-	double sim_time;
 	TaskCmdType TaskCmd, PrevTaskCmd;
+	bool bool_activate_controller;
+	bool bool_task_command_change;
+
+	double sim_time;
 	Eigen::Matrix<double, ACTIVE_DOF, ACTIVE_DOF> 	K_qp, K_qv;		//	Joint gain matrices for active joint
 	
 	// Polynomial Trajectory
