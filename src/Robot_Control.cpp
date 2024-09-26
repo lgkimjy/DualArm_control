@@ -406,18 +406,35 @@ void CRobotControl::computeControlInput(mjData* data)
 			computeJointTorque(JOINT_PD);
 		}
 		else if(TaskCmd == CL_IK) {
+			data->mocap_pos[0] = p_EE[0](0);
+			data->mocap_pos[1] = p_EE[0](1);
+			data->mocap_pos[2] = p_EE[0](2);
+			data->mocap_quat[0] = _Rot2Quat(R_EE[0])[0];
+			data->mocap_quat[1] = _Rot2Quat(R_EE[0])[1];
+			data->mocap_quat[2] = _Rot2Quat(R_EE[0])[2];
+			data->mocap_quat[3] = _Rot2Quat(R_EE[0])[3];
+			data->mocap_pos[3] = p_EE[1](0);
+			data->mocap_pos[4] = p_EE[1](1);
+			data->mocap_pos[5] = p_EE[1](2);
+			data->mocap_quat[4] = _Rot2Quat(R_EE[1])[0];
+			data->mocap_quat[5] = _Rot2Quat(R_EE[1])[1];
+			data->mocap_quat[6] = _Rot2Quat(R_EE[1])[2];
+			data->mocap_quat[7] = _Rot2Quat(R_EE[1])[3];
 			LeftEEPlanner(14.0);
 			RightEEPlanner(14.0);
 			CLIK(data);
 			computeJointTorque(TORQUE);	// INV_DYN
 		}
 		else if(TaskCmd == OCS_POS) {
-			// computeJointTorque(TORQUE);		// JOINT_PD, TORQUE, GRAV_COMP, INV_DYN
+			p_lEE_d = p_lEE;
+			p_rEE_d = p_rEE;
+			OperationalSpaceControl(data, TaskCmd);
+			computeJointTorque(TORQUE);		// JOINT_PD, TORQUE, GRAV_COMP, INV_DYN
 		}
 		else if(TaskCmd == OCS_POSE) {
 			p_lEE_d = p_lEE;
 			p_rEE_d = p_rEE;
-			OperationalSpaceControl(data);
+			OperationalSpaceControl(data, TaskCmd);
 			computeJointTorque(TORQUE);		// JOINT_PD, TORQUE, GRAV_COMP, INV_DYN
 		}
 		else if(TaskCmd == BIMANUAL) {
@@ -447,36 +464,9 @@ void CRobotControl::computeControlInput(mjData* data)
 		data->mocap_quat[6] = _Rot2Quat(R_EE[1])[2];
 		data->mocap_quat[7] = _Rot2Quat(R_EE[1])[3];
 		joint_torq.setZero();
+		computeJointTorque(TORQUE);		// JOINT_PD, TORQUE, GRAV_COMP, INV_DYN
 	}
 	lEE_d.add(sim_time, p_lEE_d(0), p_lEE_d(1), p_lEE_d(2), pdot_lEE_d(0), pdot_lEE_d(1), pdot_lEE_d(2));
-
-	// if(sim_time < TORQUE_ON){
-	// 	p_lEE_d = p_lEE;
-	// 	p_rEE_d = p_rEE;
-	// 	computeJointTorque(JOINT_PD);
-	// }
-	// else if(sim_time < TORQUE_ON + INITIAL_POSE) {
-	// 	p_lEE_d = p_lEE;
-	// 	p_rEE_d = p_rEE;
-	// 	JointPlanner(INITIAL_POSE);
-	// 	computeJointTorque(JOINT_PD);
-	// }
-	// else
-	// {	
-	// 	// LeftEEPlanner(14.0);
-	// 	// RightEEPlanner(14.0);
-	// 	// CLIK(data);
-	// 	// if(sim_time > 18.0)	computeJointTorque(GRAV_COMP);
-	// 	// else				computeJointTorque(INV_DYN);
-
-	// 	OperationalSpaceControl(data);
-	// 	computeJointTorque(TORQUE);		// JOINT_PD, TORQUE, GRAV_COMP, INV_DYN
-
-	// 	// bimanualTaskControl(data);
-	// 	// NullSpacePlanner();
-	// 	// OptimalControl();
-	// 	// computeJointTorque(TORQUE);		// JOINT_PD, TORQUE, GRAV_COMP, INV_DYN
-	// }
 }
 
 void CRobotControl::JointPlanner(double duration)
@@ -500,13 +490,13 @@ void CRobotControl::LeftEEPlanner(double duration)
 
 	if(lEE_local_t == 0.0) {
 		std::cout << "[" << sim_time << "] At LeftEEPlanner" << std::endl;
-		vector<Eigen::Vector3d> ctrl_pts = {p_lEE, {0.3, 0.1, 0.7}, {0.3, 0.3, 0.9}, {0.3, 0.5, 0.7},  {0.3, 0.3, 0.5}, 
-													{0.3, 0.1, 0.7}, {0.3, 0.3, 0.9}, {0.3, 0.5, 0.7}, {0.3, 0.3, 0.5}, 
-													{0.3, 0.1, 0.7}, {0.3, 0.3, 0.9}, {0.3, 0.5, 0.7}, {0.3, 0.3, 0.5}, 
-													{0.3, 0.1, 0.7}, {0.3, 0.3, 0.9}, {0.3, 0.5, 0.7}, {0.3, 0.3, 0.5}, 
-													{0.3, 0.1, 0.7}, {0.3, 0.3, 0.9}, {0.3, 0.5, 0.7}, {0.3, 0.3, 0.5}, 
-													{0.3, 0.1, 0.7}, {0.3, 0.3, 0.9}, {0.3, 0.5, 0.7}, {0.3, 0.3, 0.5}, 
-													{0.3, 0.1, 0.7}, {0.3, 0.3, 0.9}, {0.3, 0.5, 0.7}, {0.3, 0.3, 0.5}, p_lEE};
+		vector<Eigen::Vector3d> ctrl_pts = {p_lEE, {0.3, 0.1, 0.8}, {0.3, 0.3, 1.0}, {0.3, 0.5, 0.8}, {0.3, 0.3, 0.6}, 
+												   {0.3, 0.1, 0.8}, {0.3, 0.3, 1.0}, {0.3, 0.5, 0.8}, {0.3, 0.3, 0.6}, 
+												   {0.3, 0.1, 0.8}, {0.3, 0.3, 1.0}, {0.3, 0.5, 0.8}, {0.3, 0.3, 0.6}, 
+												   {0.3, 0.1, 0.8}, {0.3, 0.3, 1.0}, {0.3, 0.5, 0.8}, {0.3, 0.3, 0.6}, 
+												   {0.3, 0.1, 0.8}, {0.3, 0.3, 1.0}, {0.3, 0.5, 0.8}, {0.3, 0.3, 0.6}, 
+												   {0.3, 0.1, 0.8}, {0.3, 0.3, 1.0}, {0.3, 0.5, 0.8}, {0.3, 0.3, 0.6}, 
+												   {0.3, 0.1, 0.8}, {0.3, 0.3, 1.0}, {0.3, 0.5, 0.8}, {0.3, 0.3, 0.6}, p_lEE};
 		int SpType = CLAMPED_SPLINE;
 		lEE_CubicSpline_Traj.initSpline(duration, ctrl_pts, SpType);
 	}
@@ -514,6 +504,9 @@ void CRobotControl::LeftEEPlanner(double duration)
 	pdot_lEE_d = lEE_CubicSpline_Traj.getVelocityAt(lEE_local_t);
 	pddot_lEE_d = lEE_CubicSpline_Traj.getAccelerationAt(lEE_local_t);
 	lEE_local_t += robot.getSamplingTime();
+	if(lEE_local_t >= duration) {
+		lEE_local_t = 0.0;
+	}
 }
 
 void CRobotControl::RightEEPlanner(double duration)
@@ -527,13 +520,13 @@ void CRobotControl::RightEEPlanner(double duration)
 
 	if(rEE_local_t == 0.0) {
 		std::cout << "[" << sim_time << "] At RightEEPlanner" << std::endl;
-		vector<Eigen::Vector3d> ctrl_pts = {p_rEE, {0.3, -0.1, 0.6}, {0.3, -0.3, 0.8}, {0.3, -0.5, 0.6},  {0.3, -0.3, 0.4}, 
-													{0.3, -0.1, 0.6}, {0.3, -0.3, 0.8}, {0.3, -0.5, 0.6}, {0.3, -0.3, 0.4}, 
-													{0.3, -0.1, 0.6}, {0.3, -0.3, 0.8}, {0.3, -0.5, 0.6}, {0.3, -0.3, 0.4}, 
-													{0.3, -0.1, 0.6}, {0.3, -0.3, 0.8}, {0.3, -0.5, 0.6}, {0.3, -0.3, 0.4}, 
-													{0.3, -0.1, 0.6}, {0.3, -0.3, 0.8}, {0.3, -0.5, 0.6}, {0.3, -0.3, 0.4}, 
-													{0.3, -0.1, 0.6}, {0.3, -0.3, 0.8}, {0.3, -0.5, 0.6}, {0.3, -0.3, 0.4}, 
-													{0.3, -0.1, 0.6}, {0.3, -0.3, 0.8}, {0.3, -0.5, 0.6}, {0.3, -0.3, 0.4}, p_rEE};
+		vector<Eigen::Vector3d> ctrl_pts = {p_rEE, {0.3, -0.1, 0.7}, {0.3, -0.3, 0.9}, {0.3, -0.5, 0.7}, {0.3, -0.3, 0.5}, 
+												   {0.3, -0.1, 0.7}, {0.3, -0.3, 0.9}, {0.3, -0.5, 0.7}, {0.3, -0.3, 0.5}, 
+												   {0.3, -0.1, 0.7}, {0.3, -0.3, 0.9}, {0.3, -0.5, 0.7}, {0.3, -0.3, 0.5}, 
+												   {0.3, -0.1, 0.7}, {0.3, -0.3, 0.9}, {0.3, -0.5, 0.7}, {0.3, -0.3, 0.5}, 
+												   {0.3, -0.1, 0.7}, {0.3, -0.3, 0.9}, {0.3, -0.5, 0.7}, {0.3, -0.3, 0.5}, 
+												   {0.3, -0.1, 0.7}, {0.3, -0.3, 0.9}, {0.3, -0.5, 0.7}, {0.3, -0.3, 0.5}, 
+												   {0.3, -0.1, 0.7}, {0.3, -0.3, 0.9}, {0.3, -0.5, 0.7}, {0.3, -0.3, 0.5}, p_rEE};
 		int SpType = CLAMPED_SPLINE;
 		rEE_CubicSpline_Traj.initSpline(duration, ctrl_pts, SpType);
 	}
@@ -541,9 +534,12 @@ void CRobotControl::RightEEPlanner(double duration)
 	pdot_rEE_d = rEE_CubicSpline_Traj.getVelocityAt(rEE_local_t);
 	pddot_rEE_d = rEE_CubicSpline_Traj.getAccelerationAt(rEE_local_t);
 	rEE_local_t += robot.getSamplingTime();
+	if(rEE_local_t >= duration) {
+		rEE_local_t = 0.0;
+	}
 }
 
-void CRobotControl::OperationalSpaceControl(mjData* data)
+void CRobotControl::OperationalSpaceControl(mjData* data, TaskCmdType Task)
 {
 	if(initial_clik_flag == false)
 	{
@@ -554,104 +550,108 @@ void CRobotControl::OperationalSpaceControl(mjData* data)
 
 	Eigen::MatrixXd InvJ;
 
-	// Eigen::Matrix<double, 6, TOTAL_DOF> Aug_Jp_EE;
-	// Eigen::Matrix<double, 6, 1> X_cmd;
-	// Eigen::Matrix<double, 6, 1> Xdot_cmd;
-	// Eigen::Matrix<double, 6, 1> X_curr;
-	// Eigen::Matrix<double, 6, 1> Xdot_curr;
-	// Eigen::Matrix<double, 6, 1> X_err;
-	// Eigen::Matrix<double, 6, 1> Xdot_err;
-	// Aug_Jp_EE.block(0, 0, 3, TOTAL_DOF) = Jp_EE[0];
-	// Aug_Jp_EE.block(3, 0, 3, TOTAL_DOF) = Jp_EE[1];
+	if(Task == OCS_POS) 
+	{
+		Eigen::Matrix<double, 6, TOTAL_DOF> Aug_Jp_EE;
+		Eigen::Matrix<double, 6, 1> X_cmd;
+		Eigen::Matrix<double, 6, 1> Xdot_cmd;
+		Eigen::Matrix<double, 6, 1> X_curr;
+		Eigen::Matrix<double, 6, 1> Xdot_curr;
+		Eigen::Matrix<double, 6, 1> X_err;
+		Eigen::Matrix<double, 6, 1> Xdot_err;
+		Aug_Jp_EE.block(0, 0, 3, TOTAL_DOF) = Jp_EE[0];
+		Aug_Jp_EE.block(3, 0, 3, TOTAL_DOF) = Jp_EE[1];
 
-	// X_cmd(0) = data->mocap_pos[0];
-	// X_cmd(1) = data->mocap_pos[1];
-	// X_cmd(2) = data->mocap_pos[2];
-	// X_cmd(3) = data->mocap_pos[3];
-	// X_cmd(4) = data->mocap_pos[4];
-	// X_cmd(5) = data->mocap_pos[5];
+		X_cmd(0) = data->mocap_pos[0];
+		X_cmd(1) = data->mocap_pos[1];
+		X_cmd(2) = data->mocap_pos[2];
+		X_cmd(3) = data->mocap_pos[3];
+		X_cmd(4) = data->mocap_pos[4];
+		X_cmd(5) = data->mocap_pos[5];
 
-	// Xdot_cmd.segment<3>(0).setZero();
-	// Xdot_cmd.segment<3>(3).setZero();
+		Xdot_cmd.segment<3>(0).setZero();
+		Xdot_cmd.segment<3>(3).setZero();
 
-	// X_curr.segment<3>(0) = p_lEE;
-	// X_curr.segment<3>(3) = p_rEE;
-	// Xdot_curr.segment<3>(0) = pdot_lEE;
-	// Xdot_curr.segment<3>(3) = pdot_rEE;
+		X_curr.segment<3>(0) = p_lEE;
+		X_curr.segment<3>(3) = p_rEE;
+		Xdot_curr.segment<3>(0) = pdot_lEE;
+		Xdot_curr.segment<3>(3) = pdot_rEE;
 
-	// X_err = X_cmd - X_curr;
-	// Xdot_err = Xdot_cmd - Xdot_curr;
+		X_err = X_cmd - X_curr;
+		Xdot_err = Xdot_cmd - Xdot_curr;
 
-	// NullCtrl.svd_pseudoInverse(Aug_Jp_EE, InvJ);
+		NullCtrl.svd_pseudoInverse(Aug_Jp_EE, InvJ);
 
-	// // torq_cmd = robot.M_mat * Aug_Jp_EE.transpose() * (250 * Xdot_err + 1500 * X_err);		// jacobian transpose
-	// torq_cmd = robot.M_mat * InvJ * (250 * Xdot_err + 1500 * X_err);							// jacobian pseudo-inverse
-	// torq_cmd += robot.C_mat * robot.qdot + robot.g_vec;										// operational space control (only control position of end-effector)
-	
-	// Eigen::Matrix<double, ACTIVE_DOF, ACTIVE_DOF> I34;
-	// I34.setIdentity();
-	// torq_cmd += (I34 - InvJ * Aug_Jp_EE) * (K_qp * (qpos_init - robot.q) - K_qv * robot.qdot);	// Null space control
+		// torq_cmd = robot.M_mat * Aug_Jp_EE.transpose() * (250 * Xdot_err + 1500 * X_err);		// jacobian transpose
+		torq_cmd = robot.M_mat * InvJ * (250 * Xdot_err + 1500 * X_err);							// jacobian pseudo-inverse
+		torq_cmd += robot.C_mat * robot.qdot + robot.g_vec;										// operational space control (only control position of end-effector)
+		
+		Eigen::Matrix<double, ACTIVE_DOF, ACTIVE_DOF> I34;
+		I34.setIdentity();
+		torq_cmd += (I34 - InvJ * Aug_Jp_EE) * (K_qp * (qpos_init - robot.q) - K_qv * robot.qdot);	// Null space control
+	}
+	else if(Task == OCS_POSE)
+	{
+		Eigen::Matrix<double, 12, TOTAL_DOF> Aug_Jp_EE;
+		Eigen::Matrix<double, 12, 1> X_cmd;
+		Eigen::Matrix<double, 12, 1> Xdot_cmd;
+		Eigen::Matrix<double, 12, 1> X_curr;
+		Eigen::Matrix<double, 12, 1> Xdot_curr;
+		Eigen::Matrix<double, 12, 1> X_err;
+		Eigen::Matrix<double, 12, 1> Xdot_err;
+		Aug_Jp_EE.block(0, 0, 3, TOTAL_DOF) = Jp_EE[0];
+		Aug_Jp_EE.block(3, 0, 3, TOTAL_DOF) = Jr_EE[0];
+		Aug_Jp_EE.block(6, 0, 3, TOTAL_DOF) = Jp_EE[1];
+		Aug_Jp_EE.block(9, 0, 3, TOTAL_DOF) = Jr_EE[1];
 
+		X_cmd.setZero();
+		X_cmd(0) = data->mocap_pos[0];
+		X_cmd(1) = data->mocap_pos[1];
+		X_cmd(2) = data->mocap_pos[2];
+		X_cmd(6) = data->mocap_pos[3];
+		X_cmd(7) = data->mocap_pos[4];
+		X_cmd(8) = data->mocap_pos[5];
 
-	Eigen::Matrix<double, 12, TOTAL_DOF> Aug_Jp_EE;
-	Eigen::Matrix<double, 12, 1> X_cmd;
-	Eigen::Matrix<double, 12, 1> Xdot_cmd;
-	Eigen::Matrix<double, 12, 1> X_curr;
-	Eigen::Matrix<double, 12, 1> Xdot_curr;
-	Eigen::Matrix<double, 12, 1> X_err;
-	Eigen::Matrix<double, 12, 1> Xdot_err;
-	Aug_Jp_EE.block(0, 0, 3, TOTAL_DOF) = Jp_EE[0];
-	Aug_Jp_EE.block(3, 0, 3, TOTAL_DOF) = Jr_EE[0];
-	Aug_Jp_EE.block(6, 0, 3, TOTAL_DOF) = Jp_EE[1];
-	Aug_Jp_EE.block(9, 0, 3, TOTAL_DOF) = Jr_EE[1];
+		Xdot_cmd.segment<3>(0).setZero();
+		Xdot_cmd.segment<3>(3).setZero();
+		Xdot_cmd.segment<3>(6).setZero();
+		Xdot_cmd.segment<3>(9).setZero();
 
-	X_cmd.setZero();
-	X_cmd(0) = data->mocap_pos[0];
-	X_cmd(1) = data->mocap_pos[1];
-	X_cmd(2) = data->mocap_pos[2];
-	X_cmd(6) = data->mocap_pos[3];
-	X_cmd(7) = data->mocap_pos[4];
-	X_cmd(8) = data->mocap_pos[5];
+		X_curr.setZero();
+		Xdot_curr.setZero();
+		X_curr.segment<3>(0) = p_lEE;
+		X_curr.segment<3>(6) = p_rEE;
+		Xdot_curr.segment<3>(0) = pdot_lEE;
+		Xdot_curr.segment<3>(6) = pdot_rEE;
 
-	Xdot_cmd.segment<3>(0).setZero();
-	Xdot_cmd.segment<3>(3).setZero();
-	Xdot_cmd.segment<3>(6).setZero();
-	Xdot_cmd.segment<3>(9).setZero();
+		X_err = X_cmd - X_curr;
+		Xdot_err = Xdot_cmd - Xdot_curr;
 
-	X_curr.setZero();
-	Xdot_curr.setZero();
-	X_curr.segment<3>(0) = p_lEE;
-	X_curr.segment<3>(6) = p_rEE;
-	Xdot_curr.segment<3>(0) = pdot_lEE;
-	Xdot_curr.segment<3>(6) = pdot_rEE;
+		Eigen::Vector4d quat_tmp;
+		quat_tmp << data->mocap_quat[0], data->mocap_quat[1], data->mocap_quat[2], data->mocap_quat[3];
+		Eigen::Matrix3d errorMatrix = _Quat2Rot(quat_tmp) * R_lEE.transpose();
+		Eigen::AngleAxisd errorAngleAxis(errorMatrix);
+		errorAngleAxis.angle() * errorAngleAxis.axis().transpose();
+		X_err.segment<3>(3) = errorAngleAxis.angle() * errorAngleAxis.axis().transpose();
 
-	X_err = X_cmd - X_curr;
-	Xdot_err = Xdot_cmd - Xdot_curr;
+		quat_tmp << data->mocap_quat[4], data->mocap_quat[5], data->mocap_quat[6], data->mocap_quat[7];
+		errorMatrix = _Quat2Rot(quat_tmp) * R_rEE.transpose();
+		errorAngleAxis = Eigen::AngleAxisd(errorMatrix);
 
-	Eigen::Vector4d quat_tmp;
-	quat_tmp << data->mocap_quat[0], data->mocap_quat[1], data->mocap_quat[2], data->mocap_quat[3];
-    Eigen::Matrix3d errorMatrix = _Quat2Rot(quat_tmp) * R_lEE.transpose();
-    Eigen::AngleAxisd errorAngleAxis(errorMatrix);
-	errorAngleAxis.angle() * errorAngleAxis.axis().transpose();
-	X_err.segment<3>(3) = errorAngleAxis.angle() * errorAngleAxis.axis().transpose();
+		X_err.segment<3>(9) = errorAngleAxis.angle() * errorAngleAxis.axis().transpose();
+		Xdot_err.segment<3>(3) = -omega_lEE;
+		Xdot_err.segment<3>(9) = -omega_rEE;
 
-	quat_tmp << data->mocap_quat[4], data->mocap_quat[5], data->mocap_quat[6], data->mocap_quat[7];
-	errorMatrix = _Quat2Rot(quat_tmp) * R_rEE.transpose();
-	errorAngleAxis = Eigen::AngleAxisd(errorMatrix);
+		NullCtrl.svd_pseudoInverse(Aug_Jp_EE, InvJ);
 
-	X_err.segment<3>(9) = errorAngleAxis.angle() * errorAngleAxis.axis().transpose();
-	Xdot_err.segment<3>(3) = -omega_lEE;
-	Xdot_err.segment<3>(9) = -omega_rEE;
-
-	NullCtrl.svd_pseudoInverse(Aug_Jp_EE, InvJ);
-
-	// torq_cmd = robot.M_mat * Aug_Jp_EE.transpose() * (250 * Xdot_err + 1500 * X_err);		// jacobian transpose
-	torq_cmd = robot.M_mat * InvJ * (250 * Xdot_err + 1500 * X_err);							// jacobian pseudo-inverse
-	torq_cmd += robot.C_mat * robot.qdot + robot.g_vec;											// operational space control (6D)
-	
-	Eigen::Matrix<double, ACTIVE_DOF, ACTIVE_DOF> I34;
-	I34.setIdentity();
-	torq_cmd += (I34 - InvJ * Aug_Jp_EE) * (K_qp * (qpos_init - robot.q) - K_qv * robot.qdot);	// added for null space control
+		// torq_cmd = robot.M_mat * Aug_Jp_EE.transpose() * (250 * Xdot_err + 1500 * X_err);		// jacobian transpose
+		torq_cmd = robot.M_mat * InvJ * (250 * Xdot_err + 1500 * X_err);							// jacobian pseudo-inverse
+		torq_cmd += robot.C_mat * robot.qdot + robot.g_vec;											// operational space control (6D)
+		
+		Eigen::Matrix<double, ACTIVE_DOF, ACTIVE_DOF> I34;
+		I34.setIdentity();
+		torq_cmd += (I34 - InvJ * Aug_Jp_EE) * (K_qp * (qpos_init - robot.q) - K_qv * robot.qdot);	// added for null space control
+	}
 }
 
 void CRobotControl::CLIK(mjData* data)
@@ -674,31 +674,41 @@ void CRobotControl::CLIK(mjData* data)
 	Aug_Jp_EE.block(6, 0, 3, TOTAL_DOF) = Jp_EE[1];
 	Aug_Jp_EE.block(9, 0, 3, TOTAL_DOF) = Jr_EE[1];
 
-	X_cmd(0) = data->mocap_pos[0];
-	X_cmd(1) = data->mocap_pos[1];
-	X_cmd(2) = data->mocap_pos[2];
-	Eigen::Vector3d temp1 = _Rot2Eul(_Quat2Rot({data->mocap_quat[0], data->mocap_quat[1], data->mocap_quat[2], data->mocap_quat[3]}));
-	X_cmd.segment<3>(3) = temp1;
-	X_cmd(6) = data->mocap_pos[3];
-	X_cmd(7) = data->mocap_pos[4];
-	X_cmd(8) = data->mocap_pos[5];
-	Eigen::Vector3d temp2 = _Rot2Eul(_Quat2Rot({data->mocap_quat[4], data->mocap_quat[5], data->mocap_quat[6], data->mocap_quat[7]}));
-	X_cmd.segment<3>(9) = temp2;
+	// X_cmd(0) = data->mocap_pos[0];
+	// X_cmd(1) = data->mocap_pos[1];
+	// X_cmd(2) = data->mocap_pos[2];
+	// Eigen::Vector3d temp1 = _Rot2Eul(_Quat2Rot({data->mocap_quat[0], data->mocap_quat[1], data->mocap_quat[2], data->mocap_quat[3]}));
+	// X_cmd.segment<3>(3) = temp1;
+	// X_cmd(6) = data->mocap_pos[3];
+	// X_cmd(7) = data->mocap_pos[4];
+	// X_cmd(8) = data->mocap_pos[5];
+	// Eigen::Vector3d temp2 = _Rot2Eul(_Quat2Rot({data->mocap_quat[4], data->mocap_quat[5], data->mocap_quat[6], data->mocap_quat[7]}));
+	// X_cmd.segment<3>(9) = temp2;
 
-	Xdot_cmd.segment<3>(0).setZero();
+	// Xdot_cmd.segment<3>(0).setZero();
+	// Xdot_cmd.segment<3>(3).setZero();
+	// Xdot_cmd.segment<3>(6).setZero();
+	// Xdot_cmd.segment<3>(9).setZero();
+
+	X_cmd.segment<3>(0) = p_lEE_d;
+	X_cmd.segment<3>(3).setZero();
+	X_cmd.segment<3>(6) = p_rEE_d;
+	X_cmd.segment<3>(9).setZero();
+
+	Xdot_cmd.segment<3>(0) = pdot_lEE_d;
 	Xdot_cmd.segment<3>(3).setZero();
-	Xdot_cmd.segment<3>(6).setZero();
+	Xdot_cmd.segment<3>(6) = pdot_rEE_d;
 	Xdot_cmd.segment<3>(9).setZero();
 
-	// R_lEE_d = R_lEE_d.setIdentity() * _Rot_Z(D2R(90)) * _Rot_Y(D2R(-90));
-	// R_rEE_d = R_rEE_d.setIdentity() * _Rot_Z(D2R(90)) * _Rot_Y(D2R(-90));
+	R_lEE_d = R_lEE_d.setIdentity();// * _Rot_Z(D2R(90)) * _Rot_Y(D2R(-90));
+	R_rEE_d = R_rEE_d.setIdentity() * _Rot_Z(D2R(90)) * _Rot_Y(D2R(-90));
 
 	X_curr.segment<3>(0) = p_lEE;
-	// X_curr.segment<3>(3) = getPhi(R_lEE, R_lEE_d);
-	X_curr.segment<3>(3) = _Rot2Eul(R_lEE);
+	X_curr.segment<3>(3) = getPhi(R_lEE, R_lEE_d);
+	// X_curr.segment<3>(3) = _Rot2Eul(R_lEE);
 	X_curr.segment<3>(6) = p_rEE;
-	// X_curr.segment<3>(9) = getPhi(R_rEE, R_rEE_d);
-	X_curr.segment<3>(9) = _Rot2Eul(R_rEE);
+	X_curr.segment<3>(9) = getPhi(R_rEE, R_rEE_d);
+	// X_curr.segment<3>(9) = _Rot2Eul(R_rEE);
 
 	NullCtrl.svd_pseudoInverse(Aug_Jp_EE, InvJ);
 	
